@@ -3,25 +3,23 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Navbar } from "@/components/Navbar";
-import { getRankingPlayerById, RANKING_PLAYERS } from "@/data/ranking";
 import { getPlayerDisplay, getPlayerMatchHistory } from "@/data/ranking/playerHistory";
+import { fetchPlayerByIdFromSupabase } from "@/lib/ranking/supabase-players";
 import { absoluteUrl } from "@/lib/site-config";
 
 type PageProps = {
   params: Promise<{ id: string }>;
 };
 
-export function generateStaticParams() {
-  return RANKING_PLAYERS.map((p) => ({ id: p.id }));
-}
+export const revalidate = 60;
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
-  const player = getRankingPlayerById(id);
-  if (!player) {
+  const row = await fetchPlayerByIdFromSupabase(id);
+  if (!row) {
     return { title: "Jugador" };
   }
-  const name = `${player.firstName} ${player.lastName}`;
+  const name = `${row.name} ${row.lastname}`;
   const description = `Historial de partidos y evolución ELO individual de ${name} en el ranking Sportchain Padel (pádel en parejas).`;
   return {
     title: name,
@@ -29,11 +27,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     openGraph: {
       title: `${name} — historial y ELO`,
       description,
-      url: `/ranking/${player.id}`,
+      url: `/ranking/${row.id}`,
       locale: "es_ES",
     },
     alternates: {
-      canonical: absoluteUrl(`/ranking/${player.id}`),
+      canonical: absoluteUrl(`/ranking/${row.id}`),
     },
   };
 }
@@ -63,13 +61,13 @@ function PlayerLink({ id, label }: { id: string; label: string }) {
 
 export default async function PlayerHistoryPage({ params }: PageProps) {
   const { id } = await params;
-  const player = getRankingPlayerById(id);
-  if (!player) {
+  const row = await fetchPlayerByIdFromSupabase(id);
+  if (!row) {
     notFound();
   }
 
   const matches = getPlayerMatchHistory(id);
-  const name = `${player.firstName} ${player.lastName}`;
+  const name = `${row.name} ${row.lastname}`;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -85,7 +83,7 @@ export default async function PlayerHistoryPage({ params }: PageProps) {
 
         <header className="mb-8 border-4 border-[var(--color-accent-gold)] bg-[var(--color-surface)] p-5 shadow-[6px_6px_0_rgba(0,0,0,0.15)] sm:p-6">
           <p className="navbar-text mb-1 text-xs uppercase tracking-[0.15em] text-[var(--color-primary)]">
-            Player #{player.id}
+            Player #{row.id}
           </p>
           <h1 className="text-2xl font-black uppercase text-[var(--color-primary)] sm:text-3xl">
             {name}
@@ -102,14 +100,14 @@ export default async function PlayerHistoryPage({ params }: PageProps) {
                 Current ELO (individual)
               </dt>
               <dd className="navbar-text text-lg tabular-nums text-[var(--color-primary)]">
-                {player.points}
+                {row.rating}
               </dd>
             </div>
             <div>
               <dt className="navbar-text text-[10px] uppercase text-[var(--color-subtle-text)]">
                 Matches played
               </dt>
-              <dd className="font-medium tabular-nums">{player.matchesPlayed}</dd>
+              <dd className="font-medium tabular-nums">{row.matches_played}</dd>
             </div>
             <div>
               <dt className="navbar-text text-[10px] uppercase text-[var(--color-subtle-text)]">
