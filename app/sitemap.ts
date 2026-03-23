@@ -22,16 +22,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
     },
     {
-      url: `${base}/tournaments`,
+      url: `${base}/torneos`,
       lastModified: now,
       changeFrequency: "weekly",
       priority: 0.9,
-    },
-    {
-      url: `${base}/pitch`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.5,
     },
   ];
 
@@ -46,7 +40,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...UPCOMING_TOURNAMENTS,
     ...PAST_TOURNAMENTS,
   ].map((t) => ({
-    url: absoluteUrl(`/tournaments/${t.slug}`),
+    url: absoluteUrl(`/torneos/${t.slug}`),
     lastModified: now,
     changeFrequency: "weekly" as const,
     priority: 0.75,

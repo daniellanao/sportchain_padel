@@ -11,6 +11,7 @@ export const metadata: Metadata = {
     title: SITE_NAME,
     description: SITE_DESCRIPTION,
     url: "/",
+    locale: "es_ES",
   },
   alternates: {
     canonical: "/",

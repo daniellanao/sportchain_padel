@@ -5,15 +5,16 @@ import { Navbar } from "@/components/Navbar";
 import { RANKING_PLAYERS } from "@/data/ranking";
 
 const description =
-  "Live-style ELO leaderboard for padel players: rank, matches played, and rating points. Track who’s on top at your club.";
+  "Ranking ELO de jugadores de pádel Sportchain: posición, partidos jugados y puntos. Consulta la clasificación y el historial de cada jugador.";
 
 export const metadata: Metadata = {
-  title: "Player ranking",
+  title: "Ranking",
   description,
   openGraph: {
-    title: "Player ranking",
+    title: "Ranking ELO — Sportchain Padel",
     description,
     url: "/ranking",
+    locale: "es_ES",
   },
   alternates: {
     canonical: "/ranking",

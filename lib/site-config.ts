@@ -2,19 +2,21 @@
  * Site-wide SEO / URL helpers.
  * Set `NEXT_PUBLIC_SITE_URL` in production (no trailing slash), e.g. https://sportchain.example.com
  */
-export const SITE_NAME = "Sportchain Padel Ranking";
+export const SITE_NAME = "Padel Sportchain | Ranking y Torneos";
 
 export const SITE_DESCRIPTION =
-  "Padel player rankings powered by ELO. Track matches, climb the leaderboard, and follow Swiss-format tournaments — built for clubs and competitive players.";
+  "Plataforma oficial de eventos de padel de Sportchain: consulta torneos de pádel, clasificaciones en tiempo real y ranking ELO. Sigue el sistema suizo, resultados y la tabla de jugadores en un solo lugar.";
 
 export const SITE_KEYWORDS = [
-  "padel",
-  "padel ranking",
-  "ELO rating",
-  "padel tournament",
-  "Swiss format",
   "Sportchain",
-  "leaderboard",
+  "torneos pádel",
+  "ranking pádel",
+  "ELO pádel",
+  "eventos Sportchain",
+  "clasificación pádel",
+  "padel",
+  "sistema suizo",
+  "leaderboard pádel",
 ] as const;
 
 /** Default OG / social image under `public/` */

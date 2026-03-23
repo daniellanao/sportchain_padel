@@ -45,7 +45,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    locale: "en_US",
+    locale: "es_ES",
     url: siteUrl,
     siteName: SITE_NAME,
     title: SITE_NAME,
@@ -55,7 +55,7 @@ export const metadata: Metadata = {
         url: DEFAULT_OG_IMAGE_PATH,
         width: 1200,
         height: 630,
-        alt: `${SITE_NAME} — padel club pixel art`,
+        alt: "Sportchain Padel — ranking y torneos de pádel (eventos Sportchain)",
       },
     ],
   },
@@ -64,9 +64,6 @@ export const metadata: Metadata = {
     title: SITE_NAME,
     description: SITE_DESCRIPTION,
     images: [DEFAULT_OG_IMAGE_PATH],
-  },
-  alternates: {
-    canonical: "/",
   },
   category: "sports",
 };
@@ -86,11 +83,15 @@ const websiteJsonLd = {
   name: SITE_NAME,
   description: SITE_DESCRIPTION,
   url: siteUrl,
-  inLanguage: "en",
+  inLanguage: "es",
   about: {
     "@type": "Thing",
-    name: "Padel",
-    description: "Racket sport and competitive rankings using ELO.",
+    name: "Pádel",
+    description: "Deporte de raqueta, torneos y ranking competitivo con sistema ELO (eventos Sportchain).",
+  },
+  publisher: {
+    "@type": "Organization",
+    name: "Sportchain",
   },
 };
 
@@ -100,7 +101,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+    <html lang="es" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
         <JsonLd data={websiteJsonLd} />
         {children}

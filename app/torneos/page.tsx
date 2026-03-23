@@ -10,18 +10,19 @@ import {
 } from "@/data/tournaments";
 
 const description =
-  "Browse upcoming and past padel tournaments. Swiss system draws, schedules, and event details — all in one place.";
+  "Torneos de pádel Sportchain: próximos eventos, histórico, formato suizo, horarios y requisitos ELO. Consulta la información oficial de cada torneo.";
 
 export const metadata: Metadata = {
-  title: "Tournaments",
+  title: "Torneos",
   description,
   openGraph: {
-    title: "Tournaments",
+    title: "Torneos de pádel — Sportchain",
     description,
-    url: "/tournaments",
+    url: "/torneos",
+    locale: "es_ES",
   },
   alternates: {
-    canonical: "/tournaments",
+    canonical: "/torneos",
   },
 };
 
@@ -147,7 +148,7 @@ export default function TournamentsPage() {
               {PAST_TOURNAMENTS.map((t) => (
                 <li key={t.slug} data-slug={t.slug}>
                   <Link
-                    href={`/tournaments/${t.slug}`}
+                    href={`/torneos/${t.slug}`}
                     className="block border-2 border-[var(--color-muted)] bg-[var(--color-surface)] px-4 py-3 text-sm transition hover:border-[var(--color-primary)]"
                   >
                     <span className="font-medium text-[var(--color-foreground)]">{t.name}</span>

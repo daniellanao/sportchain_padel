@@ -19,17 +19,18 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { id } = await params;
   const player = getRankingPlayerById(id);
   if (!player) {
-    return { title: "Player" };
+    return { title: "Jugador" };
   }
   const name = `${player.firstName} ${player.lastName}`;
-  const description = `Doubles match history (padel pairs) and individual ELO change for ${name}.`;
+  const description = `Historial de partidos y evolución ELO individual de ${name} en el ranking Sportchain Padel (pádel en parejas).`;
   return {
     title: name,
     description,
     openGraph: {
-      title: `${name} — match history`,
+      title: `${name} — historial y ELO`,
       description,
       url: `/ranking/${player.id}`,
+      locale: "es_ES",
     },
     alternates: {
       canonical: absoluteUrl(`/ranking/${player.id}`),
@@ -39,7 +40,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 function formatDate(iso: string) {
   try {
-    return new Date(iso + "T12:00:00Z").toLocaleDateString("en-GB", {
+    return new Date(iso + "T12:00:00Z").toLocaleDateString("es", {
       day: "numeric",
       month: "short",
       year: "numeric",

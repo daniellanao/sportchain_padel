@@ -96,7 +96,7 @@ export function Navbar() {
       >
         <div className="flex flex-col gap-2 py-3">
           <Link href="/" className={mobileLinkClass} onClick={() => setOpen(false)}>
-            Home
+            Inicio
           </Link>
           <Link href="/ranking" className={mobileLinkClass} onClick={() => setOpen(false)}>
             Ranking

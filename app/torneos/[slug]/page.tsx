@@ -29,20 +29,21 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params;
   const tournament = getTournamentBySlug(slug);
   if (!tournament) {
-    return { title: "Tournament" };
+    return { title: "Torneo" };
   }
-  const description = `${tournament.name} on ${tournament.dateLabel} at ${tournament.timeLabel}. ${formatTournamentFormatLabel(tournament)}. ${tournament.playerCount} players${tournament.minElo != null ? `. Min ELO ${tournament.minElo}` : ""}.`;
+  const description = `${tournament.name}: ${tournament.dateLabel}, ${tournament.timeLabel}. ${formatTournamentFormatLabel(tournament)}. ${tournament.playerCount} jugadores${tournament.minElo != null ? `. ELO mínimo ${tournament.minElo}` : ""}. Torneo Sportchain.`;
   return {
     title: tournament.name,
     description,
     openGraph: {
       title: tournament.name,
       description,
-      url: `/tournaments/${tournament.slug}`,
+      url: `/torneos/${tournament.slug}`,
+      locale: "es_ES",
       images: tournament.imageUrl ? [{ url: tournament.imageUrl, alt: tournament.name }] : undefined,
     },
     alternates: {
-      canonical: absoluteUrl(`/tournaments/${tournament.slug}`),
+      canonical: absoluteUrl(`/torneos/${tournament.slug}`),
     },
   };
 }
@@ -62,10 +63,10 @@ export default async function TournamentBySlugPage({ params }: PageProps) {
 
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6">
         <Link
-          href="/tournaments"
+          href="/torneos"
           className="navbar-text mb-6 inline-block border-2 border-[var(--color-accent-gold)] bg-[var(--color-primary)] px-4 py-2 text-xs uppercase text-white transition hover:brightness-110"
         >
-          ← All tournaments
+          ← Todos los torneos
         </Link>
 
         <header className="mb-8 border-4 border-[var(--color-accent-gold)] bg-[var(--color-surface)] p-5 shadow-[6px_6px_0_rgba(0,0,0,0.15)] sm:p-6">
