@@ -27,6 +27,8 @@ export type Tournament = {
   status: TournamentStatus;
   /** Public URL — file lives under `public/` (e.g. `/tournaments/aleph_padel_tournament.png`) */
   imageUrl?: string;
+  /** Venue / city (e.g. from Supabase `location`) */
+  location?: string;
   /** Minimum ELO required to register (optional) */
   minElo?: number;
 };
