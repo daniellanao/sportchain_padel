@@ -1,26 +1,107 @@
 @import "tailwindcss";
 
+/* 🎨 Default light mode */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Core palette */
+  --background: #f9fafb; /* Main very light gray background */
+  --foreground: #0b1f3b; /* Main navy text */
+
+  /* Brand colors */
+  --color-primary: #12305d; /* Navy adjusted for better contrast */
+  --color-accent-gold: #e3c273; /* Gold with more luminance */
+
+  /* Surfaces */
+  --color-muted: #e9edf3; /* Light gray for sections */
+  --color-surface: #ffffff; /* Cards / elevated backgrounds */
+
+  /* Secondary text token */
+  --color-subtle-text: rgba(11, 31, 59, 0.72);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+
+  /* Map brand colors into Tailwind custom tokens */
+  --color-primary: var(--color-primary);
+  --color-accent-gold: var(--color-accent-gold);
+  --color-muted: var(--color-muted);
+  --color-surface: var(--color-surface);
+
+  --font-sans: var(--font-open-sans);
   --font-mono: var(--font-geist-mono);
 }
 
+/* 🌙 Dark mode based on prefers-color-scheme */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* Near-black background with blue tint (similar to slate-950) */
+    --background: #0b1220;
+    /* Main light foreground text */
+    --foreground: #e8ecf5;
+
+    /* Softer navy for readability on dark backgrounds */
+    --color-primary: #2b4c83;
+
+    /* Gold with stronger contrast */
+    --color-accent-gold: #f7d37a;
+
+    /* Soft dark surfaces: cards, sections */
+    --color-muted: #111827;
+    --color-surface: #0f172a;
+
+    /* Secondary text in dark mode */
+    --color-subtle-text: rgba(232, 236, 245, 0.78);
   }
 }
 
+/* Base body styles */
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-open-sans), Arial, Helvetica, sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-montserrat), Arial, Helvetica, sans-serif;
+}
+
+/* Custom logo and navbar text classes */
+.logo {
+  font-family: var(--font-montserrat), "Arial Black", "Helvetica Black", sans-serif;
+  font-weight: 900;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+.navbar-text {
+  font-family: "Arial Black", "Helvetica Black", sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+/* Button with gold accent hover effect */
+.btn-gold {
+  background-color: var(--color-accent-gold);
+  color: var(--color-primary);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.btn-gold:hover {
+  background-color: #d6b45d;
+  color: #0a162b;
+}
+
+.golden-circle {
+  background-color: var(--color-accent-gold);
+  color: var(--color-primary);
+  border: 1px solid var(--color-accent-gold);
+}
+
+.text-blue {
+  color: var(--color-primary);
+}
+
+.background-blue {
+  background-color: var(--color-primary);
 }
