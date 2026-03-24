@@ -11,11 +11,45 @@ import {
 } from "@/data/tournaments/aleph_padel_tournament";
 import { formatTournamentFormatLabel } from "@/data/tournaments";
 import { absoluteUrl } from "@/lib/site-config";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { fetchTournamentBySlugFromSupabase } from "@/lib/tournaments/supabase-list";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
 };
+
+type TournamentRegisteredPlayer = {
+  id: number;
+  status: string;
+  players:
+    | {
+        id: number;
+        name: string;
+        lastname: string;
+        rating: number;
+      }
+    | {
+        id: number;
+        name: string;
+        lastname: string;
+        rating: number;
+      }[]
+    | null;
+};
+
+function asPlayer(
+  value: TournamentRegisteredPlayer["players"]
+):
+  | {
+      id: number;
+      name: string;
+      lastname: string;
+      rating: number;
+    }
+  | null {
+  if (!value) return null;
+  return Array.isArray(value) ? (value[0] ?? null) : value;
+}
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
@@ -48,6 +82,31 @@ export default async function TournamentBySlugPage({ params }: PageProps) {
     notFound();
   }
   const { tournament } = result;
+  const tournamentId = Number(tournament.id);
+
+  let registeredPlayers: TournamentRegisteredPlayer[] = [];
+  if (Number.isInteger(tournamentId) && tournamentId > 0) {
+    const supabase = createSupabaseServerClient();
+    if (supabase) {
+      const { data } = await supabase
+        .from("player_tournament")
+        .select("id, status, players(id, name, lastname, rating)")
+        .eq("tournament_id", tournamentId)
+        .order("created_at", { ascending: true });
+      registeredPlayers = (data ?? []) as TournamentRegisteredPlayer[];
+      registeredPlayers.sort((a, b) => {
+        const aPlayer = asPlayer(a.players);
+        const bPlayer = asPlayer(b.players);
+        const aRating = aPlayer?.rating ?? -Infinity;
+        const bRating = bPlayer?.rating ?? -Infinity;
+        if (aRating !== bRating) return bRating - aRating;
+
+        const aName = `${aPlayer?.name ?? ""} ${aPlayer?.lastname ?? ""}`.trim().toLowerCase();
+        const bName = `${bPlayer?.name ?? ""} ${bPlayer?.lastname ?? ""}`.trim().toLowerCase();
+        return aName.localeCompare(bName, "es");
+      });
+    }
+  }
 
   const showAlephDetail = slug === ALEPH_TOURNAMENT_SLUG;
 
@@ -64,6 +123,56 @@ export default async function TournamentBySlugPage({ params }: PageProps) {
         </Link>
 
         <TournamentCard tournament={tournament} />
+
+        <section className="mb-10">
+          <h2 className="navbar-text mb-3 text-xs uppercase tracking-[0.12em] text-[var(--color-primary)]">
+            Jugadores inscritos
+          </h2>
+          <div className="overflow-x-auto border-2 border-[var(--color-primary)]">
+            <table className="w-full min-w-[460px] border-collapse text-left text-xs">
+              <thead>
+                <tr className="border-b-2 border-[var(--color-primary)] bg-[var(--color-primary)] text-white">
+                  <th className="px-2 py-1.5">#</th>
+                  <th className="px-2 py-1.5">Jugador</th>
+                  <th className="px-2 py-1.5">ELO</th>
+                  <th className="px-2 py-1.5">Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                {registeredPlayers.length === 0 ? (
+                  <tr className="bg-[var(--color-surface)]">
+                    <td colSpan={4} className="px-2 py-2 text-[var(--color-subtle-text)]">
+                      Aun no hay jugadores registrados.
+                    </td>
+                  </tr>
+                ) : (
+                  registeredPlayers.map((row, index) => {
+                    const player = asPlayer(row.players);
+                    return (
+                      <tr
+                        key={row.id}
+                        className={
+                          index % 2 === 0
+                            ? "border-b border-[var(--color-muted)] bg-[var(--color-muted)]/40"
+                            : "border-b border-[var(--color-muted)] bg-[var(--color-surface)]"
+                        }
+                      >
+                        <td className="px-2 py-1.5 font-mono tabular-nums">{index + 1}</td>
+                        <td className="px-2 py-1.5">
+                          {player ? `${player.name} ${player.lastname}` : `Player #${row.id}`}
+                        </td>
+                        <td className="px-2 py-1.5 font-mono tabular-nums">{player?.rating ?? "—"}</td>
+                        <td className="px-2 py-1.5 uppercase text-[var(--color-subtle-text)]">
+                          {row.status}
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
 
         {showAlephDetail ? (
           <>
