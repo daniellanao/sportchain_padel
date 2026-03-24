@@ -21,11 +21,26 @@ type PageProps = {
   searchParams: Promise<{ error?: string; success?: string }>;
 };
 
+type RelationPlayer = Pick<PlayerDbRow, "id" | "name" | "lastname" | "email" | "rating">;
+
+type TournamentPlayerRelation = {
+  id: number;
+  player_id: number;
+  status: string;
+  created_at: string | null;
+  players: RelationPlayer | RelationPlayer[] | null;
+};
+
 function formatDateTime(value: string | null): string {
   if (!value) return "—";
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return value;
   return d.toLocaleString("es-ES");
+}
+
+function getRelationPlayer(value: TournamentPlayerRelation["players"]): RelationPlayer | null {
+  if (!value) return null;
+  return Array.isArray(value) ? (value[0] ?? null) : value;
 }
 
 function rowEntries(t: TournamentDbRow): Array<[string, string]> {
@@ -76,13 +91,7 @@ export default async function AdminTournamentDetailPage({ params, searchParams }
     .eq("tournament_id", tournament.id)
     .order("created_at", { ascending: true });
 
-  const relations = (joinedRows ?? []) as Array<{
-    id: number;
-    player_id: number;
-    status: string;
-    created_at: string | null;
-    players: Pick<PlayerDbRow, "id" | "name" | "lastname" | "email" | "rating"> | null;
-  }>;
+  const relations = (joinedRows ?? []) as TournamentPlayerRelation[];
 
   const { data: allPlayersRows } = await supabase
     .from("players")
@@ -177,10 +186,15 @@ export default async function AdminTournamentDetailPage({ params, searchParams }
                 key={r.id}
                 className="flex flex-wrap items-center justify-between gap-2 rounded border border-foreground/10 px-3 py-2 text-sm"
               >
-                <span>
-                  {r.players ? `${r.players.name} ${r.players.lastname}` : `Player #${r.player_id}`}{" "}
-                  <span className="text-[color:var(--color-subtle-text)]">({r.status})</span>
-                </span>
+                {(() => {
+                  const player = getRelationPlayer(r.players);
+                  return (
+                    <span>
+                      {player ? `${player.name} ${player.lastname}` : `Player #${r.player_id}`}{" "}
+                      <span className="text-[color:var(--color-subtle-text)]">({r.status})</span>
+                    </span>
+                  );
+                })()}
                 <form action={removePlayerFromTournamentAction}>
                   <input type="hidden" name="slug" value={slug} />
                   <input type="hidden" name="playerTournamentId" value={r.id} />
