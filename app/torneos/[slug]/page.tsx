@@ -3,10 +3,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Navbar } from "@/components/Navbar";
-import { TournamentCard } from "@/components/tournaments/TournamentCard";
+import { StandingsTable, type StandingsTableRow } from "@/components/tournaments/StandingsTable";
+
 import {
   ALEPH_MATCHES_BY_ROUND,
-  ALEPH_STANDINGS,
   ALEPH_TOURNAMENT_SLUG,
 } from "@/data/tournaments/aleph_padel_tournament";
 import { formatTournamentFormatLabel } from "@/data/tournaments";
@@ -35,6 +35,32 @@ type TournamentRegisteredPlayer = {
         rating: number;
       }[]
     | null;
+};
+
+type TournamentTeam = {
+  id: number;
+  player1_id: number;
+  player2_id: number;
+  team_name: string | null;
+};
+
+type BasicPlayer = {
+  id: number;
+  name: string;
+  lastname: string;
+};
+
+type StandingDbRow = {
+  id: number;
+  team_id: number;
+  points: number;
+  matches_played: number;
+  matches_won: number;
+  matches_lost: number;
+  games_won: number;
+  games_lost: number;
+  games_difference: number;
+  buchholz: number;
 };
 
 function asPlayer(
@@ -85,6 +111,9 @@ export default async function TournamentBySlugPage({ params }: PageProps) {
   const tournamentId = Number(tournament.id);
 
   let registeredPlayers: TournamentRegisteredPlayer[] = [];
+  let teams: TournamentTeam[] = [];
+  let playersById = new Map<number, BasicPlayer>();
+  let standingsRows: StandingsTableRow[] = [];
   if (Number.isInteger(tournamentId) && tournamentId > 0) {
     const supabase = createSupabaseServerClient();
     if (supabase) {
@@ -105,6 +134,63 @@ export default async function TournamentBySlugPage({ params }: PageProps) {
         const bName = `${bPlayer?.name ?? ""} ${bPlayer?.lastname ?? ""}`.trim().toLowerCase();
         return aName.localeCompare(bName, "es");
       });
+
+      const { data: teamsData } = await supabase
+        .from("teams")
+        .select("id, player1_id, player2_id, team_name")
+        .eq("tournament_id", tournamentId)
+        .order("id", { ascending: true });
+      teams = (teamsData ?? []) as TournamentTeam[];
+
+      const playerIds = Array.from(
+        new Set(
+          teams.flatMap((t) => [t.player1_id, t.player2_id]).filter((id) => Number.isInteger(id) && id > 0)
+        )
+      );
+      if (playerIds.length > 0) {
+        const { data: playersData } = await supabase
+          .from("players")
+          .select("id, name, lastname")
+          .in("id", playerIds);
+        const players = (playersData ?? []) as BasicPlayer[];
+        playersById = new Map(players.map((p) => [p.id, p]));
+      }
+
+      const { data: standingsData } = await supabase
+        .from("standings")
+        .select(
+          "id, team_id, points, matches_played, matches_won, matches_lost, games_won, games_lost, games_difference, buchholz"
+        )
+        .eq("tournament_id", tournamentId);
+      const rawStandings = (standingsData ?? []) as StandingDbRow[];
+
+      const teamNameById = new Map<number, string>(
+        teams.map((team) => {
+          const p1 = playersById.get(team.player1_id);
+          const p2 = playersById.get(team.player2_id);
+          const fallback = `${p1 ? `${p1.name} ${p1.lastname}` : `Player #${team.player1_id}`} / ${p2 ? `${p2.name} ${p2.lastname}` : `Player #${team.player2_id}`}`;
+          return [team.id, team.team_name?.trim() || fallback];
+        })
+      );
+
+      standingsRows = rawStandings
+        .map((row) => ({
+          teamName: teamNameById.get(row.team_id) || `Team #${row.team_id}`,
+          points: row.points,
+          matchesPlayed: row.matches_played,
+          matchesWon: row.matches_won,
+          matchesLost: row.matches_lost,
+          gamesWon: row.games_won,
+          gamesLost: row.games_lost,
+          gamesDifference: row.games_difference,
+          buchholz: row.buchholz,
+        }))
+        .sort((a, b) => {
+          if (a.points !== b.points) return b.points - a.points;
+          if (a.buchholz !== b.buchholz) return b.buchholz - a.buchholz;
+          return b.gamesDifference - a.gamesDifference;
+        })
+        .map((row, idx) => ({ ...row, rank: idx + 1 }));
     }
   }
 
@@ -122,119 +208,117 @@ export default async function TournamentBySlugPage({ params }: PageProps) {
           ← Todos los torneos
         </Link>
 
-        <TournamentCard tournament={tournament} />
+        <h2 className="text-xl font-black uppercase text-[var(--color-primary)] sm:text-3xl">
+          {tournament.name}
+        </h2>
+        <StandingsTable rows={standingsRows} title="Standings" />
+        
 
-        <section className="mb-10">
-          <h2 className="navbar-text mb-3 text-xs uppercase tracking-[0.12em] text-[var(--color-primary)]">
-            Jugadores inscritos
-          </h2>
-          <div className="overflow-x-auto border-2 border-[var(--color-primary)]">
-            <table className="w-full min-w-[460px] border-collapse text-left text-xs">
-              <thead>
-                <tr className="border-b-2 border-[var(--color-primary)] bg-[var(--color-primary)] text-white">
-                  <th className="px-2 py-1.5">#</th>
-                  <th className="px-2 py-1.5">Jugador</th>
-                  <th className="px-2 py-1.5">ELO</th>
-                  <th className="px-2 py-1.5">Estado</th>
-                </tr>
-              </thead>
-              <tbody>
-                {registeredPlayers.length === 0 ? (
-                  <tr className="bg-[var(--color-surface)]">
-                    <td colSpan={4} className="px-2 py-2 text-[var(--color-subtle-text)]">
-                      Aun no hay jugadores registrados.
-                    </td>
+        <section className="mb-10 grid grid-cols-1 gap-6 xl:grid-cols-2">
+          <div>
+            <h2 className="navbar-text mb-3 text-xs uppercase tracking-[0.12em] text-[var(--color-primary)]">
+              Jugadores inscritos
+            </h2>
+            <div className="overflow-x-auto border-2 border-[var(--color-primary)]">
+              <table className="w-full min-w-[460px] border-collapse text-left text-xs">
+                <thead>
+                  <tr className="border-b-2 border-[var(--color-primary)] bg-[var(--color-primary)] text-white">
+                    <th className="px-2 py-1.5">#</th>
+                    <th className="px-2 py-1.5">Jugador</th>
+                    <th className="px-2 py-1.5">ELO</th>
+                    <th className="px-2 py-1.5">Estado</th>
                   </tr>
-                ) : (
-                  registeredPlayers.map((row, index) => {
-                    const player = asPlayer(row.players);
-                    return (
-                      <tr
-                        key={row.id}
-                        className={
-                          index % 2 === 0
-                            ? "border-b border-[var(--color-muted)] bg-[var(--color-muted)]/40"
-                            : "border-b border-[var(--color-muted)] bg-[var(--color-surface)]"
-                        }
-                      >
-                        <td className="px-2 py-1.5 font-mono tabular-nums">{index + 1}</td>
-                        <td className="px-2 py-1.5">
-                          {player ? `${player.name} ${player.lastname}` : `Player #${row.id}`}
-                        </td>
-                        <td className="px-2 py-1.5 font-mono tabular-nums">{player?.rating ?? "—"}</td>
-                        <td className="px-2 py-1.5 uppercase text-[var(--color-subtle-text)]">
-                          {row.status}
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {registeredPlayers.length === 0 ? (
+                    <tr className="bg-[var(--color-surface)]">
+                      <td colSpan={4} className="px-2 py-2 text-[var(--color-subtle-text)]">
+                        Aun no hay jugadores registrados.
+                      </td>
+                    </tr>
+                  ) : (
+                    registeredPlayers.map((row, index) => {
+                      const player = asPlayer(row.players);
+                      return (
+                        <tr
+                          key={row.id}
+                          className={
+                            index % 2 === 0
+                              ? "border-b border-[var(--color-muted)] bg-[var(--color-muted)]/40"
+                              : "border-b border-[var(--color-muted)] bg-[var(--color-surface)]"
+                          }
+                        >
+                          <td className="px-2 py-1.5 font-mono tabular-nums">{index + 1}</td>
+                          <td className="px-2 py-1.5">
+                            {player ? `${player.name} ${player.lastname}` : `Player #${row.id}`}
+                          </td>
+                          <td className="px-2 py-1.5 font-mono tabular-nums">{player?.rating ?? "—"}</td>
+                          <td className="px-2 py-1.5 uppercase text-[var(--color-subtle-text)]">
+                            {row.status}
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div>
+            <h2 className="navbar-text mb-3 text-xs uppercase tracking-[0.12em] text-[var(--color-primary)]">
+              Equipos
+            </h2>
+            <div className="overflow-x-auto border-2 border-[var(--color-primary)]">
+              <table className="w-full min-w-[520px] border-collapse text-left text-xs">
+                <thead>
+                  <tr className="border-b-2 border-[var(--color-primary)] bg-[var(--color-primary)] text-white">
+                    <th className="px-2 py-1.5">#</th>
+                    <th className="px-2 py-1.5">Jugador 1</th>
+                    <th className="px-2 py-1.5">Jugador 2</th>
+                    <th className="px-2 py-1.5">Nombre de equipo</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {teams.length === 0 ? (
+                    <tr className="bg-[var(--color-surface)]">
+                      <td colSpan={4} className="px-2 py-2 text-[var(--color-subtle-text)]">
+                        Aun no hay equipos registrados.
+                      </td>
+                    </tr>
+                  ) : (
+                    teams.map((team, index) => {
+                      const p1 = playersById.get(team.player1_id);
+                      const p2 = playersById.get(team.player2_id);
+                      return (
+                        <tr
+                          key={team.id}
+                          className={
+                            index % 2 === 0
+                              ? "border-b border-[var(--color-muted)] bg-[var(--color-muted)]/40"
+                              : "border-b border-[var(--color-muted)] bg-[var(--color-surface)]"
+                          }
+                        >
+                          <td className="px-2 py-1.5 font-mono tabular-nums">{index + 1}</td>
+                          <td className="px-2 py-1.5">
+                            {p1 ? `${p1.name} ${p1.lastname}` : `Player #${team.player1_id}`}
+                          </td>
+                          <td className="px-2 py-1.5">
+                            {p2 ? `${p2.name} ${p2.lastname}` : `Player #${team.player2_id}`}
+                          </td>
+                          <td className="px-2 py-1.5">{team.team_name?.trim() || "—"}</td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </section>
 
         {showAlephDetail ? (
           <>
-            <section className="mb-10">
-              <h2 className="navbar-text mb-4 text-xs uppercase tracking-[0.12em] text-[var(--color-primary)]">
-                Standings
-              </h2>
-              <div className="overflow-x-auto border-4 border-[var(--color-primary)] shadow-[6px_6px_0_rgba(0,0,0,0.2)]">
-                <table className="w-full min-w-[1100px] border-collapse text-left text-xs sm:text-sm">
-                  <thead>
-                    <tr className="border-b-4 border-[var(--color-primary)] bg-[var(--color-primary)] text-white">
-                      <th className="navbar-text whitespace-nowrap px-2 py-2 sm:px-3">#</th>
-                      <th className="navbar-text whitespace-nowrap px-2 py-2 sm:px-3">Team</th>
-                      <th className="navbar-text whitespace-nowrap px-2 py-2 sm:px-3">Players</th>
-                      <th className="navbar-text whitespace-nowrap px-2 py-2 sm:px-3">R1</th>
-                      <th className="navbar-text whitespace-nowrap px-2 py-2 sm:px-3">R2</th>
-                      <th className="navbar-text whitespace-nowrap px-2 py-2 sm:px-3">R3</th>
-                      <th className="navbar-text whitespace-nowrap px-2 py-2 sm:px-3">R4</th>
-                      <th className="navbar-text whitespace-nowrap px-2 py-2 sm:px-3">MP</th>
-                      <th className="navbar-text whitespace-nowrap px-2 py-2 sm:px-3">W</th>
-                      <th className="navbar-text whitespace-nowrap px-2 py-2 sm:px-3">L</th>
-                      <th className="navbar-text whitespace-nowrap px-2 py-2 sm:px-3">GW</th>
-                      <th className="navbar-text whitespace-nowrap px-2 py-2 sm:px-3">GL</th>
-                      <th className="navbar-text whitespace-nowrap px-2 py-2 sm:px-3">Diff</th>
-                      <th className="navbar-text whitespace-nowrap px-2 py-2 sm:px-3">Wins</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {ALEPH_STANDINGS.map((row, i) => (
-                      <tr
-                        key={`${row.teamName}-${row.rank}`}
-                        className={
-                          i % 2 === 0
-                            ? "border-b border-[var(--color-muted)] bg-[var(--color-muted)]/60"
-                            : "border-b border-[var(--color-muted)] bg-[var(--color-surface)]"
-                        }
-                      >
-                        <td className="px-2 py-2 font-mono tabular-nums text-[var(--color-primary)] sm:px-3">
-                          {row.rank}
-                        </td>
-                        <td className="max-w-[140px] px-2 py-2 font-medium sm:px-3">{row.teamName}</td>
-                        <td className="max-w-[200px] px-2 py-2 text-[var(--color-subtle-text)] sm:px-3">
-                          {row.players}
-                        </td>
-                        <td className="px-2 py-2 tabular-nums sm:px-3">{row.r1 || "—"}</td>
-                        <td className="px-2 py-2 tabular-nums sm:px-3">{row.r2 || "—"}</td>
-                        <td className="px-2 py-2 tabular-nums sm:px-3">{row.r3 || "—"}</td>
-                        <td className="px-2 py-2 tabular-nums sm:px-3">{row.r4 || "—"}</td>
-                        <td className="px-2 py-2 tabular-nums sm:px-3">{row.mp}</td>
-                        <td className="px-2 py-2 tabular-nums sm:px-3">{row.w}</td>
-                        <td className="px-2 py-2 tabular-nums sm:px-3">{row.l}</td>
-                        <td className="px-2 py-2 tabular-nums sm:px-3">{row.gw}</td>
-                        <td className="px-2 py-2 tabular-nums sm:px-3">{row.gl}</td>
-                        <td className="px-2 py-2 tabular-nums sm:px-3">{row.diff}</td>
-                        <td className="px-2 py-2 tabular-nums sm:px-3">{row.wins}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </section>
-
             <section>
               <h2 className="navbar-text mb-4 text-xs uppercase tracking-[0.12em] text-[var(--color-primary)]">
                 Matches

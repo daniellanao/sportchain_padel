@@ -109,6 +109,11 @@ export default async function AdminTournamentDetailPage({ params, searchParams }
       <p className="mb-4 text-sm text-[color:var(--color-subtle-text)]">
         Informacion completa del torneo.
       </p>
+      <p className="mb-4 text-sm">
+        <Link href={`/admin/tournaments/${slug}/teams`} className="text-primary underline-offset-4 hover:underline">
+          Gestionar equipos
+        </Link>
+      </p>
       {uiError ? (
         <p className="mb-4 rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-200">
           {uiError}
