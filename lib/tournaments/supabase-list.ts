@@ -95,6 +95,11 @@ function rowToTournament(row: TournamentDbRow, listStatus: Tournament["status"])
   };
 }
 
+function statusFromRow(row: TournamentDbRow): Tournament["status"] {
+  if (row.status === "cancelled") return "cancelled";
+  return isPastRow(row, Date.now()) ? "completed" : "upcoming";
+}
+
 export type TournamentsListResult =
   | { ok: true; upcoming: Tournament[]; past: Tournament[] }
   | { ok: false; error: string; upcoming: Tournament[]; past: Tournament[] };
@@ -158,4 +163,47 @@ export async function fetchTournamentsListFromSupabase(): Promise<TournamentsLis
   });
 
   return { ok: true, upcoming, past };
+}
+
+export type TournamentBySlugResult =
+  | { ok: true; tournament: Tournament }
+  | { ok: false; error: string; tournament: null };
+
+/**
+ * Loads one tournament by slug from Supabase.
+ */
+export async function fetchTournamentBySlugFromSupabase(
+  slug: string
+): Promise<TournamentBySlugResult> {
+  const trimmedSlug = slug.trim();
+  if (!trimmedSlug) {
+    return { ok: false, error: "Slug de torneo inválido.", tournament: null };
+  }
+
+  const supabase = createSupabaseServerClient();
+  if (!supabase) {
+    return {
+      ok: false,
+      error: "Faltan NEXT_PUBLIC_SUPABASE_URL o NEXT_PUBLIC_SUPABASE_ANON_KEY en .env.local.",
+      tournament: null,
+    };
+  }
+
+  const { data, error } = await supabase
+    .from("tournaments")
+    .select("*")
+    .eq("slug", trimmedSlug)
+    .maybeSingle();
+
+  if (error) {
+    return { ok: false, error: error.message, tournament: null };
+  }
+
+  if (!data) {
+    return { ok: false, error: "Torneo no encontrado.", tournament: null };
+  }
+
+  const row = data as TournamentDbRow;
+  const tournament = rowToTournament(row, statusFromRow(row));
+  return { ok: true, tournament };
 }

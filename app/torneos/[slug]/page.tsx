@@ -9,28 +9,21 @@ import {
   ALEPH_STANDINGS,
   ALEPH_TOURNAMENT_SLUG,
 } from "@/data/tournaments/aleph_padel_tournament";
-import {
-  formatTournamentFormatLabel,
-  getTournamentBySlug,
-  PAST_TOURNAMENTS,
-  UPCOMING_TOURNAMENTS,
-} from "@/data/tournaments";
+import { formatTournamentFormatLabel } from "@/data/tournaments";
 import { absoluteUrl } from "@/lib/site-config";
+import { fetchTournamentBySlugFromSupabase } from "@/lib/tournaments/supabase-list";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
 };
 
-export function generateStaticParams() {
-  return [...UPCOMING_TOURNAMENTS, ...PAST_TOURNAMENTS].map((t) => ({ slug: t.slug }));
-}
-
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const tournament = getTournamentBySlug(slug);
-  if (!tournament) {
+  const result = await fetchTournamentBySlugFromSupabase(slug);
+  if (!result.ok) {
     return { title: "Torneo" };
   }
+  const { tournament } = result;
   const description = `${tournament.name}: ${tournament.dateLabel}, ${tournament.timeLabel}. ${formatTournamentFormatLabel(tournament)}. ${tournament.playerCount} jugadores${tournament.minElo != null ? `. ELO mínimo ${tournament.minElo}` : ""}. Torneo Sportchain.`;
   return {
     title: tournament.name,
@@ -50,10 +43,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function TournamentBySlugPage({ params }: PageProps) {
   const { slug } = await params;
-  const tournament = getTournamentBySlug(slug);
-  if (!tournament) {
+  const result = await fetchTournamentBySlugFromSupabase(slug);
+  if (!result.ok) {
     notFound();
   }
+  const { tournament } = result;
 
   const showAlephDetail = slug === ALEPH_TOURNAMENT_SLUG;
 
