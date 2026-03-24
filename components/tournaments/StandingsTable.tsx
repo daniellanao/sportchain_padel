@@ -27,24 +27,34 @@ export function StandingsTable({
       <h2 className="navbar-text mb-4 text-xs uppercase tracking-[0.12em] text-[var(--color-primary)]">
         {title}
       </h2>
-      <div className="overflow-x-auto border-4 border-[var(--color-primary)] shadow-[6px_6px_0_rgba(0,0,0,0.2)]">
-        <table className="w-full min-w-[920px] border-collapse text-left text-xs sm:text-sm">
+      <div className="overflow-hidden border-4 border-[var(--color-primary)] shadow-[6px_6px_0_rgba(0,0,0,0.2)]">
+        <table className="w-full table-fixed border-collapse text-left text-[10px] sm:text-sm">
+          <colgroup>
+            <col className="w-[8%]" />
+            <col className="w-[34%]" />
+            <col className="w-[8%]" />
+            <col className="w-[8%]" />
+            <col className="w-[8%]" />
+            <col className="w-[11%]" />
+            <col className="w-[11%]" />
+            <col className="w-[12%]" />
+          </colgroup>
           <thead>
             <tr className="border-b-4 border-[var(--color-primary)] bg-[var(--color-primary)] text-white">
-              <th className="navbar-text whitespace-nowrap px-2 py-2 sm:px-3">#</th>
-              <th className="navbar-text whitespace-nowrap px-2 py-2 sm:px-3">Team</th>              
-              <th className="navbar-text whitespace-nowrap px-2 py-2 sm:px-3">MP</th>
-              <th className="navbar-text whitespace-nowrap px-2 py-2 sm:px-3">W</th>
-              <th className="navbar-text whitespace-nowrap px-2 py-2 sm:px-3">L</th>
-              <th className="navbar-text whitespace-nowrap px-2 py-2 sm:px-3">GW</th>
-              <th className="navbar-text whitespace-nowrap px-2 py-2 sm:px-3">GL</th>
-              <th className="navbar-text whitespace-nowrap px-2 py-2 sm:px-3">Diff</th>
+              <th className="navbar-text whitespace-nowrap px-1 py-1.5 text-center sm:px-2 sm:py-2">#</th>
+              <th className="navbar-text whitespace-nowrap px-1 py-1.5 sm:px-2 sm:py-2">Team</th>
+              <th className="navbar-text whitespace-nowrap px-1 py-1.5 text-center sm:px-2 sm:py-2">MP</th>
+              <th className="navbar-text whitespace-nowrap px-1 py-1.5 text-center sm:px-2 sm:py-2">W</th>
+              <th className="navbar-text whitespace-nowrap px-1 py-1.5 text-center sm:px-2 sm:py-2">L</th>
+              <th className="navbar-text whitespace-nowrap px-1 py-1.5 text-center sm:px-2 sm:py-2">GW</th>
+              <th className="navbar-text whitespace-nowrap px-1 py-1.5 text-center sm:px-2 sm:py-2">GL</th>
+              <th className="navbar-text whitespace-nowrap px-1 py-1.5 text-center sm:px-2 sm:py-2">Diff</th>
             </tr>
           </thead>
           <tbody>
             {rows.length === 0 ? (
               <tr className="bg-[var(--color-surface)]">
-                <td colSpan={9} className="px-3 py-3 text-[var(--color-subtle-text)]">
+                <td colSpan={8} className="px-2 py-3 text-center text-[var(--color-subtle-text)]">
                   {emptyLabel}
                 </td>
               </tr>
@@ -58,16 +68,28 @@ export function StandingsTable({
                       : "border-b border-[var(--color-muted)] bg-[var(--color-surface)]"
                   }
                 >
-                  <td className="px-2 py-2 font-mono tabular-nums text-[var(--color-primary)] sm:px-3">
+                  <td className="px-1 py-1.5 text-center font-mono tabular-nums text-[var(--color-primary)] sm:px-2 sm:py-2">
                     {row.rank}
                   </td>
-                  <td className="max-w-[260px] px-2 py-2 font-medium sm:px-3">{row.teamName}</td>                  
-                  <td className="px-2 py-2 tabular-nums sm:px-3">{row.matchesPlayed}</td>
-                  <td className="px-2 py-2 tabular-nums sm:px-3">{row.matchesWon}</td>
-                  <td className="px-2 py-2 tabular-nums sm:px-3">{row.matchesLost}</td>
-                  <td className="px-2 py-2 tabular-nums sm:px-3">{row.gamesWon}</td>
-                  <td className="px-2 py-2 tabular-nums sm:px-3">{row.gamesLost}</td>
-                  <td className="px-2 py-2 tabular-nums sm:px-3">{row.gamesDifference}</td>
+                  <td className="truncate px-1 py-1.5 font-medium sm:px-2 sm:py-2">{row.teamName}</td>
+                  <td className="px-1 py-1.5 text-center font-mono tabular-nums sm:px-2 sm:py-2">
+                    {row.matchesPlayed}
+                  </td>
+                  <td className="px-1 py-1.5 text-center font-mono tabular-nums sm:px-2 sm:py-2">
+                    {row.matchesWon}
+                  </td>
+                  <td className="px-1 py-1.5 text-center font-mono tabular-nums sm:px-2 sm:py-2">
+                    {row.matchesLost}
+                  </td>
+                  <td className="px-1 py-1.5 text-center font-mono tabular-nums sm:px-2 sm:py-2">
+                    {row.gamesWon}
+                  </td>
+                  <td className="px-1 py-1.5 text-center font-mono tabular-nums sm:px-2 sm:py-2">
+                    {row.gamesLost}
+                  </td>
+                  <td className="px-1 py-1.5 text-center font-mono tabular-nums sm:px-2 sm:py-2">
+                    {row.gamesDifference}
+                  </td>
                 </tr>
               ))
             )}

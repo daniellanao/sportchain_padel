@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Navbar } from "@/components/Navbar";
+import { RoundMatches, type RoundMatchesRound } from "@/components/tournaments/RoundMatches";
 import { StandingsTable, type StandingsTableRow } from "@/components/tournaments/StandingsTable";
 
 import {
@@ -63,6 +64,17 @@ type StandingDbRow = {
   buchholz: number;
 };
 
+type MatchDbRow = {
+  id: number;
+  round_number: number;
+  team1_id: number | null;
+  team2_id: number | null;
+  team1_games: number;
+  team2_games: number;
+  status: string;
+  finished: boolean;
+};
+
 function asPlayer(
   value: TournamentRegisteredPlayer["players"]
 ):
@@ -114,6 +126,11 @@ export default async function TournamentBySlugPage({ params }: PageProps) {
   let teams: TournamentTeam[] = [];
   let playersById = new Map<number, BasicPlayer>();
   let standingsRows: StandingsTableRow[] = [];
+  let roundMatchesRounds: RoundMatchesRound[] = Array.from({ length: 4 }, (_, i) => ({
+    roundNumber: i + 1,
+    label: `Ronda ${i + 1}`,
+    matches: [],
+  }));
   if (Number.isInteger(tournamentId) && tournamentId > 0) {
     const supabase = createSupabaseServerClient();
     if (supabase) {
@@ -191,6 +208,39 @@ export default async function TournamentBySlugPage({ params }: PageProps) {
           return b.gamesDifference - a.gamesDifference;
         })
         .map((row, idx) => ({ ...row, rank: idx + 1 }));
+
+      const { data: matchesData } = await supabase
+        .from("matches")
+        .select(
+          "id, round_number, team1_id, team2_id, team1_games, team2_games, status, finished"
+        )
+        .eq("tournament_id", tournamentId)
+        .order("round_number", { ascending: true })
+        .order("id", { ascending: true });
+
+      const rawMatches = (matchesData ?? []) as MatchDbRow[];
+      const matchesByRound = new Map<number, MatchDbRow[]>();
+      for (const m of rawMatches) {
+        const r = m.round_number;
+        if (!matchesByRound.has(r)) matchesByRound.set(r, []);
+        matchesByRound.get(r)!.push(m);
+      }
+
+      roundMatchesRounds = [1, 2, 3, 4].map((rn) => ({
+        roundNumber: rn,
+        label: `Ronda ${rn}`,
+        matches: (matchesByRound.get(rn) ?? []).map((m) => ({
+          id: m.id,
+          team1Name:
+            m.team1_id != null ? teamNameById.get(m.team1_id) ?? `Team #${m.team1_id}` : "—",
+          team2Name:
+            m.team2_id != null ? teamNameById.get(m.team2_id) ?? `Team #${m.team2_id}` : "—",
+          team1Games: m.team1_games,
+          team2Games: m.team2_games,
+          status: m.status,
+          finished: m.finished,
+        })),
+      }));
     }
   }
 
@@ -212,7 +262,8 @@ export default async function TournamentBySlugPage({ params }: PageProps) {
           {tournament.name}
         </h2>
         <StandingsTable rows={standingsRows} title="Standings" />
-        
+
+        <RoundMatches rounds={roundMatchesRounds} />
 
         <section className="mb-10 grid grid-cols-1 gap-6 xl:grid-cols-2">
           <div>
