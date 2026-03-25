@@ -110,7 +110,7 @@ export function RoundMatches({
                           : "border-b-2 border-[var(--color-primary)] bg-[var(--color-primary)] text-white"
                       }
                     >
-                      <th className="px-1 py-1.5 text-center sm:px-2">#</th>
+                      <th className="px-1 py-1.5 text-center sm:px-2">C</th>
                       <th className="px-1 py-1.5 sm:px-2">Equipo 1</th>
                       <th className="px-1 py-1.5 text-center sm:px-2">G1-G2</th>
                       <th className="px-1 py-1.5 sm:px-2">Equipo 2</th>
@@ -127,7 +127,7 @@ export function RoundMatches({
                         }
                       >
                         <td className="px-1 py-1.5 text-center font-mono tabular-nums sm:px-2">
-                          {index + 1}
+                          {`C${(index % 4) + 1}`}
                         </td>
                         <td className="truncate px-1 py-1.5 font-medium sm:px-2">
                           <span className="inline-flex items-center gap-0.5">
