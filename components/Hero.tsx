@@ -23,9 +23,12 @@ export function Hero() {
         </p>
 
         <h1 className="mb-5 text-3xl font-black uppercase leading-tight text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.45)] sm:text-5xl">
-          Sportchain Padel — Ranking y torneos
+          Sportchain Padel
         </h1>
 
+      <h2 className="mb-5 text-3xl font-black uppercase leading-tight text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.45)] sm:text-5xl">
+        Ranking y torneos
+      </h2>
         <p className="mx-auto max-w-2xl text-sm leading-relaxed text-[rgba(232,236,245,0.92)] sm:text-base">
           Consulta el ranking ELO, sigue los torneos de los eventos Sportchain y revisa resultados con un
           sistema transparente pensado para jugadores y clubes de pádel.

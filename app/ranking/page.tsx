@@ -42,13 +42,15 @@ export default async function RankingPage() {
           </p>
         ) : null}
 
-        <div className="mt-6 overflow-x-auto border-4 border-[var(--color-primary)] shadow-[6px_6px_0_rgba(0,0,0,0.2)]">
-          <table className="w-full min-w-[640px] border-collapse text-left text-xs leading-tight">
+        <div className="mt-6 overflow-hidden border-4 border-[var(--color-primary)] shadow-[6px_6px_0_rgba(0,0,0,0.2)]">
+          <table className="w-full table-fixed border-collapse text-left text-xs leading-tight">
             <thead>
               <tr className="border-b-4 border-[var(--color-primary)] bg-[var(--color-primary)] text-white">
                 <th className="navbar-text w-10 px-2 py-1.5 text-[10px] uppercase sm:px-2.5">#</th>
                 <th className="navbar-text px-2 py-1.5 text-[10px] uppercase sm:px-2.5">Nombre</th>
-                <th className="navbar-text px-2 py-1.5 text-[10px] uppercase sm:px-2.5">Apellidos</th>
+                <th className="navbar-text hidden px-2 py-1.5 text-[10px] uppercase sm:table-cell sm:px-2.5">
+                  Apellidos
+                </th>
                 <th
                   className="navbar-text px-2 py-1.5 text-[10px] uppercase sm:px-2.5"
                   title="Partidos jugados"
@@ -92,10 +94,10 @@ export default async function RankingPage() {
                     <td className="px-2 py-1.5 font-mono text-[var(--color-primary)] sm:px-2.5">
                       {index + 1}
                     </td>
-                    <td className="px-2 py-1.5 font-medium text-[var(--color-foreground)] sm:px-2.5">
+                    <td className="truncate px-2 py-1.5 font-medium text-[var(--color-foreground)] sm:px-2.5">
                       {player.name}
                     </td>
-                    <td className="px-2 py-1.5 font-medium text-[var(--color-foreground)] sm:px-2.5">
+                    <td className="hidden px-2 py-1.5 font-medium text-[var(--color-foreground)] sm:table-cell sm:px-2.5">
                       {player.lastname}
                     </td>
                     <td className="px-2 py-1.5 tabular-nums text-[var(--color-subtle-text)] sm:px-2.5">
