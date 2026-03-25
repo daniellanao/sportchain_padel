@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
-import { Footer } from "@/components/Footer";
+import { ConditionalFooter } from "@/components/ConditionalFooter";
 import { JsonLd } from "@/components/JsonLd";
 import {
   DEFAULT_OG_IMAGE_PATH,
@@ -106,7 +106,7 @@ export default function RootLayout({
       <body className="flex min-h-full flex-col">
         <JsonLd data={websiteJsonLd} />
         <div className="flex min-h-full flex-1 flex-col">{children}</div>
-        <Footer />
+        <ConditionalFooter />
       </body>
     </html>
   );
