@@ -34,7 +34,9 @@ export async function fetchPlayersListFromSupabase(): Promise<PlayersListResult>
   const { data, error } = await supabase
     .from("players")
     .select("*")
-    .order("rating", { ascending: false });
+    .order("rating", { ascending: false })
+    .order("name", { ascending: true })
+    .order("lastname", { ascending: true });
 
   if (error) {
     return { ok: false, error: error.message, players: [] };

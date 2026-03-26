@@ -27,6 +27,18 @@ export default async function RankingPage() {
   const result = await fetchPlayersListFromSupabase();
   const players = result.players;
 
+  let lastRating: number | null = null;
+  let lastPosition = 0;
+  const rankedPlayers = players.map((player, index) => {
+    const rating = player.rating;
+    if (lastRating === null || rating !== lastRating) {
+      lastPosition = index + 1;
+      lastRating = rating;
+    }
+
+    return { player, index, position: lastPosition };
+  });
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
@@ -46,25 +58,26 @@ export default async function RankingPage() {
           <table className="w-full table-fixed border-collapse text-left text-xs leading-tight">
             <thead>
               <tr className="border-b-4 border-[var(--color-primary)] bg-[var(--color-primary)] text-white">
-                <th className="navbar-text w-10 px-2 py-1.5 text-[10px] uppercase sm:px-2.5">#</th>
-                <th className="navbar-text px-2 py-1.5 text-[10px] uppercase sm:px-2.5">Nombre</th>
-                <th className="navbar-text hidden px-2 py-1.5 text-[10px] uppercase sm:table-cell sm:px-2.5">
-                  Apellidos
+                <th className="navbar-text w-[10%] px-2 py-1.5 text-[10px] uppercase sm:px-2.5 text-center">
+                  #
+                </th>
+                <th className="navbar-text w-[40%] px-2 py-1.5 text-[10px] uppercase sm:px-2.5">
+                  Nombre
                 </th>
                 <th
-                  className="navbar-text px-2 py-1.5 text-[10px] uppercase sm:px-2.5"
+                  className="navbar-text w-[10%] px-2 py-1.5 text-[10px] uppercase sm:px-2.5 text-center"
                   title="Partidos jugados"
                 >
                   Part.
                 </th>
                 <th
-                  className="navbar-text px-2 py-1.5 text-[10px] uppercase sm:px-2.5"
+                  className="navbar-text w-[20%] px-2 py-1.5 text-[10px] uppercase sm:px-2.5 text-center"
                   title="Puntos ELO"
                 >
                   ELO
                 </th>
                 <th
-                  className="navbar-text w-[1%] whitespace-nowrap px-2 py-1.5 text-[10px] uppercase sm:px-2.5"
+                  className="navbar-text w-[20%] whitespace-nowrap px-2 py-1.5 text-[10px] uppercase sm:px-2.5"
                   title="Detalle del jugador"
                 >
                   Det.
@@ -75,14 +88,14 @@ export default async function RankingPage() {
               {players.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={5}
                     className="border-b border-[var(--color-muted)] bg-[var(--color-surface)] px-3 py-4 text-center text-xs text-[var(--color-subtle-text)] sm:px-4"
                   >
                     No hay jugadores en el ranking todavía.
                   </td>
                 </tr>
               ) : (
-                players.map((player, index) => (
+                rankedPlayers.map(({ player, index, position }) => (
                   <tr
                     key={player.id}
                     className={
@@ -91,22 +104,19 @@ export default async function RankingPage() {
                         : "border-b border-[var(--color-muted)] bg-[var(--color-surface)]"
                     }
                   >
-                    <td className="px-2 py-1.5 font-mono text-[var(--color-primary)] sm:px-2.5">
-                      {index + 1}
+                    <td className="w-[10%] px-2 py-1.5 font-mono tabular-nums text-[var(--color-primary)] sm:px-2.5 text-center">
+                      {position}
                     </td>
-                    <td className="truncate px-2 py-1.5 font-medium text-[var(--color-foreground)] sm:px-2.5">
-                      {player.name}
+                    <td className="w-[40%] truncate px-2 py-1.5 font-medium text-[var(--color-foreground)] sm:px-2.5">
+                      {player.name} {player.lastname}
                     </td>
-                    <td className="hidden px-2 py-1.5 font-medium text-[var(--color-foreground)] sm:table-cell sm:px-2.5">
-                      {player.lastname}
-                    </td>
-                    <td className="px-2 py-1.5 tabular-nums text-[var(--color-subtle-text)] sm:px-2.5">
+                    <td className="w-[10%] px-2 py-1.5 tabular-nums text-[var(--color-subtle-text)] sm:px-2.5 text-center">
                       {player.matches_played}
                     </td>
-                    <td className="navbar-text px-2 py-1.5 tabular-nums text-[var(--color-primary)] sm:px-2.5">
+                    <td className="navbar-text w-[20%] px-2 py-1.5 tabular-nums text-[var(--color-primary)] sm:px-2.5 text-center">
                       {player.rating}
                     </td>
-                    <td className="px-1.5 py-1 sm:px-2">
+                    <td className="w-[20%] px-1.5 py-1 sm:px-2">
                       <Link
                         href={`/ranking/${player.id}`}
                         className="navbar-text btn-gold inline-flex min-h-[26px] items-center justify-center whitespace-nowrap border-2 border-[var(--color-accent-gold)] px-2 py-0.5 text-[9px] uppercase leading-none shadow-[2px_2px_0_rgba(0,0,0,0.2)] transition hover:brightness-105 sm:text-[10px]"
