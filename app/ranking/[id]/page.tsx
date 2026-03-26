@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Navbar } from "@/components/Navbar";
-import { getPlayerDisplay, getPlayerMatchHistory } from "@/data/ranking/playerHistory";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { fetchPlayerByIdFromSupabase } from "@/lib/ranking/supabase-players";
 import { absoluteUrl } from "@/lib/site-config";
 
@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 function formatDate(iso: string) {
   try {
-    return new Date(iso + "T12:00:00Z").toLocaleDateString("es", {
+    return new Date(iso).toLocaleDateString("es", {
       day: "numeric",
       month: "short",
       year: "numeric",
@@ -48,7 +48,7 @@ function formatDate(iso: string) {
   }
 }
 
-function PlayerLink({ id, label }: { id: string; label: string }) {
+function PlayerLink({ id, label }: { id: number; label: string }) {
   return (
     <Link
       href={`/ranking/${id}`}
@@ -59,6 +59,120 @@ function PlayerLink({ id, label }: { id: string; label: string }) {
   );
 }
 
+type RatingHistoryRow = {
+  ratingMatchId: number;
+  playedAt: string;
+  result: "win" | "loss";
+  partner: { id: number; label: string } | null;
+  opponents: Array<{ id: number; label: string }>;
+  ratingBefore: number;
+  ratingAfter: number;
+};
+
+function playerLabel(p: { name: string | null; lastname: string | null } | null | undefined): string {
+  const name = String(p?.name ?? "").trim();
+  const lastname = String(p?.lastname ?? "").trim();
+  const full = `${name} ${lastname}`.trim();
+  return full || "Jugador";
+}
+
+async function fetchPlayerRatingHistoryFromSupabase(playerId: number): Promise<RatingHistoryRow[]> {
+  const supabase = createSupabaseServerClient();
+  if (!supabase) return [];
+
+  const { data, error } = await supabase
+    .from("rating_logs")
+    .select(
+      [
+        "rating_match_id",
+        "rating_before",
+        "rating_after",
+        "rating_change",
+        "rating_matches:rating_match_id(",
+        "id, played_at, status,",
+        "rating_match_players(",
+        "side, role, is_winner, player_id,",
+        "players:player_id(id, name, lastname)",
+        ")",
+        ")",
+      ].join(",")
+    )
+    .eq("player_id", playerId)
+    .order("rating_match_id", { ascending: false });
+
+  if (error || !data) return [];
+
+  const rows = data as unknown as Array<{
+    rating_match_id: number;
+    rating_before: number;
+    rating_after: number;
+    rating_change: number;
+    rating_matches: {
+      id: number;
+      played_at: string;
+      status: string;
+      rating_match_players:
+        | Array<{
+            side: number;
+            role: number;
+            is_winner: boolean;
+            player_id: number;
+            players: { id: number; name: string; lastname: string } | null;
+          }>
+        | null;
+    } | null;
+  }>;
+
+  const normalized: RatingHistoryRow[] = [];
+
+  for (const r of rows) {
+    const matchId = Number(r.rating_match_id);
+    const rm = r.rating_matches;
+    const playedAt = rm?.played_at ? String(rm.played_at) : new Date().toISOString();
+    const rpm = Array.isArray(rm?.rating_match_players) ? (rm?.rating_match_players ?? []) : [];
+
+    const me = rpm.find((x) => Number(x.player_id) === playerId) ?? null;
+    if (!me) continue;
+
+    const mySide = Number(me.side);
+    const myWon = Boolean(me.is_winner);
+    const partnerRow =
+      rpm.find((x) => Number(x.side) === mySide && Number(x.player_id) !== playerId) ?? null;
+    const opponentRows = rpm.filter((x) => Number(x.side) !== mySide);
+
+    const partner =
+      partnerRow && partnerRow.players
+        ? { id: Number(partnerRow.player_id), label: playerLabel(partnerRow.players) }
+        : null;
+
+    const opponents = opponentRows
+      .map((x) => ({
+        id: Number(x.player_id),
+        label: playerLabel(x.players),
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label, "es", { sensitivity: "base" }));
+
+    normalized.push({
+      ratingMatchId: matchId,
+      playedAt,
+      result: myWon ? "win" : "loss",
+      partner,
+      opponents,
+      ratingBefore: Number(r.rating_before),
+      ratingAfter: Number(r.rating_after),
+    });
+  }
+
+  normalized.sort((a, b) => {
+    const da = Date.parse(a.playedAt);
+    const db = Date.parse(b.playedAt);
+    if (Number.isFinite(da) && Number.isFinite(db) && da !== db) return db - da;
+    return b.ratingMatchId - a.ratingMatchId;
+  });
+
+  return normalized;
+}
+
 export default async function PlayerHistoryPage({ params }: PageProps) {
   const { id } = await params;
   const row = await fetchPlayerByIdFromSupabase(id);
@@ -66,7 +180,8 @@ export default async function PlayerHistoryPage({ params }: PageProps) {
     notFound();
   }
 
-  const matches = getPlayerMatchHistory(id);
+  const playerId = Number(id);
+  const matches = Number.isFinite(playerId) ? await fetchPlayerRatingHistoryFromSupabase(playerId) : [];
   const name = `${row.name} ${row.lastname}`;
 
   return (
@@ -78,26 +193,26 @@ export default async function PlayerHistoryPage({ params }: PageProps) {
           href="/ranking"
           className="navbar-text mb-6 inline-block border-2 border-[var(--color-accent-gold)] bg-[var(--color-primary)] px-4 py-2 text-xs uppercase text-white transition hover:brightness-110"
         >
-          ← Back to ranking
+          ← Volver al ranking
         </Link>
 
         <header className="mb-8 border-4 border-[var(--color-accent-gold)] bg-[var(--color-surface)] p-5 shadow-[6px_6px_0_rgba(0,0,0,0.15)] sm:p-6">
           <p className="navbar-text mb-1 text-xs uppercase tracking-[0.15em] text-[var(--color-primary)]">
-            Player #{row.id}
+            Jugador #{row.id}
           </p>
           <h1 className="text-2xl font-black uppercase text-[var(--color-primary)] sm:text-3xl">
             {name}
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[var(--color-subtle-text)]">
-            <strong className="text-[var(--color-foreground)]">Padel is doubles:</strong> each row
-            lists <strong>your partner</strong> and <strong>both players on the other side</strong>.
-            <strong className="text-[var(--color-foreground)]"> ELO is individual</strong> — your
-            rating change is computed for you only, not for the pair as a unit.
+            <strong className="text-[var(--color-foreground)]">El pádel se juega en parejas:</strong>{" "}
+            cada fila muestra <strong>tu compañero</strong> y <strong>los dos rivales</strong>.
+            <strong className="text-[var(--color-foreground)]"> El ELO es individual</strong>: el
+            cambio de puntos se calcula para ti, no para la pareja como bloque.
           </p>
           <dl className="mt-4 flex flex-wrap gap-6 text-sm">
             <div>
               <dt className="navbar-text text-[10px] uppercase text-[var(--color-subtle-text)]">
-                Current ELO (individual)
+                ELO actual (individual)
               </dt>
               <dd className="navbar-text text-lg tabular-nums text-[var(--color-primary)]">
                 {row.rating}
@@ -105,13 +220,13 @@ export default async function PlayerHistoryPage({ params }: PageProps) {
             </div>
             <div>
               <dt className="navbar-text text-[10px] uppercase text-[var(--color-subtle-text)]">
-                Matches played
+                Partidos jugados
               </dt>
               <dd className="font-medium tabular-nums">{row.matches_played}</dd>
             </div>
             <div>
               <dt className="navbar-text text-[10px] uppercase text-[var(--color-subtle-text)]">
-                History rows
+                Partidos en historial
               </dt>
               <dd className="font-medium tabular-nums">{matches.length}</dd>
             </div>
@@ -120,11 +235,11 @@ export default async function PlayerHistoryPage({ params }: PageProps) {
 
         <section>
           <h2 className="navbar-text mb-4 text-xs uppercase tracking-[0.12em] text-[var(--color-primary)]">
-            All matches (pairs)
+            Historial de partidos (parejas)
           </h2>
           {matches.length === 0 ? (
             <p className="text-sm text-[var(--color-subtle-text)]">
-              No recorded matches for this player yet.
+              Todavía no hay partidos registrados para este jugador.
             </p>
           ) : (
             <div className="overflow-x-auto border-4 border-[var(--color-primary)] shadow-[6px_6px_0_rgba(0,0,0,0.2)]">
@@ -132,20 +247,19 @@ export default async function PlayerHistoryPage({ params }: PageProps) {
                 <thead>
                   <tr className="border-b-4 border-[var(--color-primary)] bg-[var(--color-primary)] text-white">
                     <th className="navbar-text whitespace-nowrap px-2 py-3 text-xs uppercase sm:px-3">#</th>
-                    <th className="navbar-text whitespace-nowrap px-2 py-3 text-xs uppercase sm:px-3">Date</th>
+                    <th className="navbar-text whitespace-nowrap px-2 py-3 text-xs uppercase sm:px-3">Fecha</th>
                     <th className="navbar-text whitespace-nowrap px-2 py-3 text-xs uppercase sm:px-3">
-                      You + partner
+                      Tú + compañero
                     </th>
                     <th className="navbar-text whitespace-nowrap px-2 py-3 text-xs uppercase sm:px-3">
-                      Opponent pair
+                      Pareja rival
                     </th>
-                    <th className="navbar-text whitespace-nowrap px-2 py-3 text-xs uppercase sm:px-3">Result</th>
-                    <th className="navbar-text whitespace-nowrap px-2 py-3 text-xs uppercase sm:px-3">Score</th>
+                    <th className="navbar-text whitespace-nowrap px-2 py-3 text-xs uppercase sm:px-3">Resultado</th>
                     <th className="navbar-text whitespace-nowrap px-2 py-3 text-xs uppercase sm:px-3">
-                      ELO before
+                      ELO antes
                     </th>
                     <th className="navbar-text whitespace-nowrap px-2 py-3 text-xs uppercase sm:px-3">
-                      ELO after
+                      ELO después
                     </th>
                     <th className="navbar-text whitespace-nowrap px-2 py-3 text-xs uppercase sm:px-3">Δ</th>
                   </tr>
@@ -155,7 +269,7 @@ export default async function PlayerHistoryPage({ params }: PageProps) {
                     const delta = m.ratingAfter - m.ratingBefore;
                     return (
                       <tr
-                        key={m.matchId}
+                        key={m.ratingMatchId}
                         className={
                           index % 2 === 0
                             ? "border-b border-[var(--color-muted)] bg-[var(--color-muted)]/60"
@@ -171,15 +285,19 @@ export default async function PlayerHistoryPage({ params }: PageProps) {
                         <td className="min-w-[11rem] px-2 py-2 sm:px-3">
                           <div className="flex flex-col gap-1.5">
                             <div>
-                              <span className="text-[10px] uppercase text-[var(--color-subtle-text)]">You</span>
+                              <span className="text-[10px] uppercase text-[var(--color-subtle-text)]">Tú</span>
                               <p className="font-semibold leading-tight text-[var(--color-foreground)]">{name}</p>
                             </div>
                             <div>
                               <span className="text-[10px] uppercase text-[var(--color-subtle-text)]">
-                                Partner
+                                Compañero
                               </span>
                               <p className="leading-tight">
-                                <PlayerLink id={m.partnerId} label={getPlayerDisplay(m.partnerId)} />
+                                {m.partner ? (
+                                  <PlayerLink id={m.partner.id} label={m.partner.label} />
+                                ) : (
+                                  <span className="text-[var(--color-subtle-text)]">—</span>
+                                )}
                               </p>
                             </div>
                           </div>
@@ -188,18 +306,26 @@ export default async function PlayerHistoryPage({ params }: PageProps) {
                           <div className="flex flex-col gap-1.5">
                             <div>
                               <span className="text-[10px] uppercase text-[var(--color-subtle-text)]">
-                                Opponent 1
+                                Rival 1
                               </span>
                               <p className="leading-tight">
-                                <PlayerLink id={m.opponentId1} label={getPlayerDisplay(m.opponentId1)} />
+                                {m.opponents[0] ? (
+                                  <PlayerLink id={m.opponents[0].id} label={m.opponents[0].label} />
+                                ) : (
+                                  <span className="text-[var(--color-subtle-text)]">—</span>
+                                )}
                               </p>
                             </div>
                             <div>
                               <span className="text-[10px] uppercase text-[var(--color-subtle-text)]">
-                                Opponent 2
+                                Rival 2
                               </span>
                               <p className="leading-tight">
-                                <PlayerLink id={m.opponentId2} label={getPlayerDisplay(m.opponentId2)} />
+                                {m.opponents[1] ? (
+                                  <PlayerLink id={m.opponents[1].id} label={m.opponents[1].label} />
+                                ) : (
+                                  <span className="text-[var(--color-subtle-text)]">—</span>
+                                )}
                               </p>
                             </div>
                           </div>
@@ -212,11 +338,8 @@ export default async function PlayerHistoryPage({ params }: PageProps) {
                                 : "font-bold text-rose-700 dark:text-rose-400"
                             }
                           >
-                            {m.result === "win" ? "W" : "L"}
+                            {m.result === "win" ? "G" : "P"}
                           </span>
-                        </td>
-                        <td className="navbar-text whitespace-nowrap px-2 py-2 tabular-nums sm:px-3">
-                          {m.playerGames} – {m.opponentGames}
                         </td>
                         <td className="px-2 py-2 tabular-nums text-[var(--color-subtle-text)] sm:px-3">
                           {m.ratingBefore}
