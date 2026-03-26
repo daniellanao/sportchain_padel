@@ -212,7 +212,7 @@ export async function processRatingMatchEloAction(formData: FormData): Promise<v
 
   const { data: playersData, error: plErr } = await supabase
     .from("players")
-    .select("id, rating")
+    .select("id, rating, matches_played, wins, losses")
     .in("id", playerIds);
 
   if (plErr || !playersData || playersData.length !== 4) {
@@ -221,8 +221,27 @@ export async function processRatingMatchEloAction(formData: FormData): Promise<v
     );
   }
 
+  const winnerByPlayerId = new Map<number, boolean>(
+    rpmRows.map((r) => [Number(r.player_id), Boolean(r.is_winner)])
+  );
+
   const ratingByPlayerId = new Map<number, number>();
-  for (const p of playersData as { id: number; rating: number | null }[]) {
+  const matchesPlayedByPlayerId = new Map<number, number>();
+  const winsByPlayerId = new Map<number, number>();
+  const lossesByPlayerId = new Map<number, number>();
+
+  function nonNegativeInt(value: number | null | undefined): number {
+    const n = value == null ? 0 : Number(value);
+    return Number.isFinite(n) && n >= 0 ? Math.floor(n) : 0;
+  }
+
+  for (const p of playersData as {
+    id: number;
+    rating: number | null;
+    matches_played: number | null;
+    wins: number | null;
+    losses: number | null;
+  }[]) {
     const id = Number(p.id);
     const r = p.rating == null ? NaN : Number(p.rating);
     if (!Number.isFinite(r)) {
@@ -231,6 +250,9 @@ export async function processRatingMatchEloAction(formData: FormData): Promise<v
       );
     }
     ratingByPlayerId.set(id, r);
+    matchesPlayedByPlayerId.set(id, nonNegativeInt(p.matches_played));
+    winsByPlayerId.set(id, nonNegativeInt(p.wins));
+    lossesByPlayerId.set(id, nonNegativeInt(p.losses));
   }
 
   const built = buildEloApplyPayload(ratingMatchId, rpmRows, ratingByPlayerId);
@@ -240,22 +262,60 @@ export async function processRatingMatchEloAction(formData: FormData): Promise<v
 
   const { logRows, playerUpdates } = built.payload;
 
+  type PlayerEloWrite = (typeof playerUpdates)[number] & {
+    matchesPlayedBefore: number;
+    matchesPlayedAfter: number;
+    winsBefore: number;
+    winsAfter: number;
+    lossesBefore: number;
+    lossesAfter: number;
+  };
+
+  const fullPlayerUpdates: PlayerEloWrite[] = playerUpdates.map((u) => {
+    const mp = matchesPlayedByPlayerId.get(u.id) ?? 0;
+    const won = winnerByPlayerId.get(u.id) === true;
+    const w = winsByPlayerId.get(u.id) ?? 0;
+    const l = lossesByPlayerId.get(u.id) ?? 0;
+    return {
+      ...u,
+      matchesPlayedBefore: mp,
+      matchesPlayedAfter: mp + 1,
+      winsBefore: w,
+      winsAfter: w + (won ? 1 : 0),
+      lossesBefore: l,
+      lossesAfter: l + (won ? 0 : 1),
+    };
+  });
+
   const { error: insLogErr } = await supabase.from("rating_logs").insert(logRows);
   if (insLogErr) {
     redirect(`${path}?error=${encodeURIComponent(insLogErr.message)}`);
   }
 
   const appliedIds: number[] = [];
-  for (const u of playerUpdates) {
+  for (const u of fullPlayerUpdates) {
     const { error: upErr } = await supabase
       .from("players")
-      .update({ rating: u.ratingAfter })
+      .update({
+        rating: u.ratingAfter,
+        matches_played: u.matchesPlayedAfter,
+        wins: u.winsAfter,
+        losses: u.lossesAfter,
+      })
       .eq("id", u.id);
     if (upErr) {
       await supabase.from("rating_logs").delete().eq("rating_match_id", ratingMatchId);
       for (const pid of appliedIds) {
-        const before = playerUpdates.find((x) => x.id === pid)!.ratingBefore;
-        await supabase.from("players").update({ rating: before }).eq("id", pid);
+        const prev = fullPlayerUpdates.find((x) => x.id === pid)!;
+        await supabase
+          .from("players")
+          .update({
+            rating: prev.ratingBefore,
+            matches_played: prev.matchesPlayedBefore,
+            wins: prev.winsBefore,
+            losses: prev.lossesBefore,
+          })
+          .eq("id", pid);
       }
       redirect(`${path}?error=${encodeURIComponent(upErr.message)}`);
     }
@@ -269,8 +329,16 @@ export async function processRatingMatchEloAction(formData: FormData): Promise<v
 
   if (finErr) {
     await supabase.from("rating_logs").delete().eq("rating_match_id", ratingMatchId);
-    for (const u of playerUpdates) {
-      await supabase.from("players").update({ rating: u.ratingBefore }).eq("id", u.id);
+    for (const u of fullPlayerUpdates) {
+      await supabase
+        .from("players")
+        .update({
+          rating: u.ratingBefore,
+          matches_played: u.matchesPlayedBefore,
+          wins: u.winsBefore,
+          losses: u.lossesBefore,
+        })
+        .eq("id", u.id);
     }
     redirect(`${path}?error=${encodeURIComponent(finErr.message)}`);
   }
