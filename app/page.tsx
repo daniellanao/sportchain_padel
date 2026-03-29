@@ -4,6 +4,8 @@ import { Hero } from "../components/Hero";
 import { Navbar } from "../components/Navbar";
 import { SITE_DESCRIPTION, SITE_NAME } from "@/lib/site-config";
 
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: { absolute: SITE_NAME },
   description: SITE_DESCRIPTION,
