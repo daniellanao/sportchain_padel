@@ -60,9 +60,11 @@ function PlayerLink({ id, label }: { id: number; label: string }) {
 }
 
 type RatingHistoryRow = {
+  rowId: string;
   ratingMatchId: number;
   playedAt: string;
-  result: "win" | "loss";
+  /** Desde `is_winner` en rating_match_players; si no hay filas, se infiere por `rating_change`. */
+  result: "win" | "loss" | null;
   partner: { id: number; label: string } | null;
   opponents: Array<{ id: number; label: string }>;
   ratingBefore: number;
@@ -76,90 +78,139 @@ function playerLabel(p: { name: string | null; lastname: string | null } | null 
   return full || "Jugador";
 }
 
+function resultFromRpmOrChange(
+  me: { is_winner: boolean } | null,
+  ratingChange: number,
+): "win" | "loss" | null {
+  if (me) return me.is_winner ? "win" : "loss";
+  if (ratingChange > 0) return "win";
+  if (ratingChange < 0) return "loss";
+  return null;
+}
+
+type RpmRow = {
+  rating_match_id: number;
+  side: number;
+  role: number;
+  is_winner: boolean;
+  player_id: number;
+};
+
+/**
+ * Sin embeds anidados: evita que PostgREST/RLS devuelva `rating_matches` vacío y se pierdan todas las filas.
+ */
 async function fetchPlayerRatingHistoryFromSupabase(playerId: number): Promise<RatingHistoryRow[]> {
   const supabase = createSupabaseServerClient();
   if (!supabase) return [];
 
-  const { data, error } = await supabase
+  const { data: logs, error: logsError } = await supabase
     .from("rating_logs")
-    .select(
-      [
-        "rating_match_id",
-        "rating_before",
-        "rating_after",
-        "rating_change",
-        "rating_matches:rating_match_id(",
-        "id, played_at, status,",
-        "rating_match_players(",
-        "side, role, is_winner, player_id,",
-        "players:player_id(id, name, lastname)",
-        ")",
-        ")",
-      ].join(",")
-    )
+    .select("id, rating_match_id, rating_before, rating_after, rating_change, created_at")
     .eq("player_id", playerId)
-    .order("rating_match_id", { ascending: false });
+    .order("created_at", { ascending: false });
 
-  if (error || !data) return [];
+  if (logsError || !logs?.length) return [];
 
-  const rows = data as unknown as Array<{
-    rating_match_id: number;
-    rating_before: number;
-    rating_after: number;
-    rating_change: number;
-    rating_matches: {
-      id: number;
-      played_at: string;
-      status: string;
-      rating_match_players:
-        | Array<{
-            side: number;
-            role: number;
-            is_winner: boolean;
-            player_id: number;
-            players: { id: number; name: string; lastname: string } | null;
-          }>
-        | null;
-    } | null;
-  }>;
+  const matchIds = [
+    ...new Set(
+      logs
+        .map((l) => Number((l as { rating_match_id: unknown }).rating_match_id))
+        .filter((n) => Number.isFinite(n)),
+    ),
+  ];
+
+  const [{ data: matchRows }, { data: rpmRows }] = await Promise.all([
+    supabase.from("rating_matches").select("id, played_at").in("id", matchIds),
+    supabase
+      .from("rating_match_players")
+      .select("rating_match_id, side, role, is_winner, player_id")
+      .in("rating_match_id", matchIds),
+  ]);
+
+  const playedAtByMatchId = new Map<number, string>();
+  for (const m of matchRows ?? []) {
+    const mid = Number((m as { id: unknown }).id);
+    const raw = (m as { played_at: string | null }).played_at;
+    playedAtByMatchId.set(mid, raw ? String(raw) : "");
+  }
+
+  const rpmByMatchId = new Map<number, RpmRow[]>();
+  for (const row of rpmRows ?? []) {
+    const r = row as RpmRow;
+    const mid = Number(r.rating_match_id);
+    const list = rpmByMatchId.get(mid) ?? [];
+    list.push(r);
+    rpmByMatchId.set(mid, list);
+  }
+
+  const allPlayerIds = new Set<number>();
+  for (const row of rpmRows ?? []) {
+    allPlayerIds.add(Number((row as RpmRow).player_id));
+  }
+
+  const { data: playerRows } =
+    allPlayerIds.size > 0
+      ? await supabase.from("players").select("id, name, lastname").in("id", [...allPlayerIds])
+      : { data: [] as { id: number; name: string; lastname: string }[] | null };
+
+  const labelById = new Map<number, string>();
+  for (const p of playerRows ?? []) {
+    labelById.set(Number(p.id), playerLabel(p));
+  }
 
   const normalized: RatingHistoryRow[] = [];
 
-  for (const r of rows) {
-    const matchId = Number(r.rating_match_id);
-    const rm = r.rating_matches;
-    const playedAt = rm?.played_at ? String(rm.played_at) : new Date().toISOString();
-    const rpm = Array.isArray(rm?.rating_match_players) ? (rm?.rating_match_players ?? []) : [];
+  for (const log of logs as Array<{
+    id: unknown;
+    rating_match_id: unknown;
+    rating_before: unknown;
+    rating_after: unknown;
+    rating_change: unknown;
+    created_at: string | null;
+  }>) {
+    const rowId = String(log.id ?? "");
+    const matchId = Number(log.rating_match_id);
+    const change = Number(log.rating_change);
+    const rpm = rpmByMatchId.get(matchId) ?? [];
+    const playedFromMatch = playedAtByMatchId.get(matchId);
+    const playedAt =
+      playedFromMatch && playedFromMatch.length > 0
+        ? playedFromMatch
+        : log.created_at
+          ? String(log.created_at)
+          : new Date().toISOString();
 
     const me = rpm.find((x) => Number(x.player_id) === playerId) ?? null;
-    if (!me) continue;
 
-    const mySide = Number(me.side);
-    const myWon = Boolean(me.is_winner);
-    const partnerRow =
-      rpm.find((x) => Number(x.side) === mySide && Number(x.player_id) !== playerId) ?? null;
-    const opponentRows = rpm.filter((x) => Number(x.side) !== mySide);
+    let partner: { id: number; label: string } | null = null;
+    let opponents: Array<{ id: number; label: string }> = [];
 
-    const partner =
-      partnerRow && partnerRow.players
-        ? { id: Number(partnerRow.player_id), label: playerLabel(partnerRow.players) }
-        : null;
-
-    const opponents = opponentRows
-      .map((x) => ({
-        id: Number(x.player_id),
-        label: playerLabel(x.players),
-      }))
-      .sort((a, b) => a.label.localeCompare(b.label, "es", { sensitivity: "base" }));
+    if (me) {
+      const mySide = Number(me.side);
+      const partnerRow =
+        rpm.find((x) => Number(x.side) === mySide && Number(x.player_id) !== playerId) ?? null;
+      if (partnerRow) {
+        const pid = Number(partnerRow.player_id);
+        partner = { id: pid, label: labelById.get(pid) ?? `Jugador #${pid}` };
+      }
+      opponents = rpm
+        .filter((x) => Number(x.side) !== mySide)
+        .map((x) => {
+          const pid = Number(x.player_id);
+          return { id: pid, label: labelById.get(pid) ?? `Jugador #${pid}` };
+        })
+        .sort((a, b) => a.label.localeCompare(b.label, "es", { sensitivity: "base" }));
+    }
 
     normalized.push({
+      rowId,
       ratingMatchId: matchId,
       playedAt,
-      result: myWon ? "win" : "loss",
+      result: resultFromRpmOrChange(me, change),
       partner,
       opponents,
-      ratingBefore: Number(r.rating_before),
-      ratingAfter: Number(r.rating_after),
+      ratingBefore: Number(log.rating_before),
+      ratingAfter: Number(log.rating_after),
     });
   }
 
@@ -246,22 +297,22 @@ export default async function PlayerHistoryPage({ params }: PageProps) {
               <table className="w-full min-w-[1100px] border-collapse text-left text-sm">
                 <thead>
                   <tr className="border-b-4 border-[var(--color-primary)] bg-[var(--color-primary)] text-white">
-                    <th className="navbar-text whitespace-nowrap px-2 py-3 text-xs uppercase sm:px-3">#</th>
+                    
                     <th className="navbar-text whitespace-nowrap px-2 py-3 text-xs uppercase sm:px-3">Fecha</th>
                     <th className="navbar-text whitespace-nowrap px-2 py-3 text-xs uppercase sm:px-3">
-                      Tú + compañero
+                      Compañero
                     </th>
                     <th className="navbar-text whitespace-nowrap px-2 py-3 text-xs uppercase sm:px-3">
                       Pareja rival
                     </th>
-                    <th className="navbar-text whitespace-nowrap px-2 py-3 text-xs uppercase sm:px-3">Resultado</th>
-                    <th className="navbar-text whitespace-nowrap px-2 py-3 text-xs uppercase sm:px-3">
+                    <th className="navbar-text whitespace-nowrap px-2 py-3 text-xs uppercase sm:px-3 text-center">Resultado</th>
+                    <th className="navbar-text whitespace-nowrap px-2 py-3 text-xs uppercase sm:px-3 text-center">
                       ELO antes
                     </th>
-                    <th className="navbar-text whitespace-nowrap px-2 py-3 text-xs uppercase sm:px-3">
+                    <th className="navbar-text whitespace-nowrap px-2 py-3 text-xs uppercase sm:px-3 text-center">
                       ELO después
                     </th>
-                    <th className="navbar-text whitespace-nowrap px-2 py-3 text-xs uppercase sm:px-3">Δ</th>
+                    <th className="navbar-text whitespace-nowrap px-2 py-3 text-xs uppercase sm:px-3 text-center">Δ</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -269,16 +320,14 @@ export default async function PlayerHistoryPage({ params }: PageProps) {
                     const delta = m.ratingAfter - m.ratingBefore;
                     return (
                       <tr
-                        key={m.ratingMatchId}
+                        key={m.rowId || `m-${m.ratingMatchId}-${index}`}
                         className={
                           index % 2 === 0
                             ? "border-b border-[var(--color-muted)] bg-[var(--color-muted)]/60"
                             : "border-b border-[var(--color-muted)] bg-[var(--color-surface)]"
                         }
                       >
-                        <td className="px-2 py-2 font-mono tabular-nums text-[var(--color-primary)] sm:px-3">
-                          {index + 1}
-                        </td>
+                       
                         <td className="whitespace-nowrap px-2 py-2 text-[var(--color-foreground)] sm:px-3">
                           {formatDate(m.playedAt)}
                         </td>
@@ -330,25 +379,29 @@ export default async function PlayerHistoryPage({ params }: PageProps) {
                             </div>
                           </div>
                         </td>
-                        <td className="px-2 py-2 sm:px-3">
-                          <span
-                            className={
-                              m.result === "win"
-                                ? "font-bold text-emerald-700 dark:text-emerald-400"
-                                : "font-bold text-rose-700 dark:text-rose-400"
-                            }
-                          >
-                            {m.result === "win" ? "G" : "P"}
-                          </span>
+                        <td className="px-2 py-2 sm:px-3 text-center">
+                          {m.result == null ? (
+                            <span className="text-[var(--color-subtle-text)]">—</span>
+                          ) : (
+                            <span
+                              className={
+                                m.result === "win"
+                                  ? "font-bold text-emerald-700 dark:text-emerald-400"
+                                  : "font-bold text-rose-700 dark:text-rose-400"
+                              }
+                            >
+                              {m.result === "win" ? "V" : "D"}
+                            </span>
+                          )}
                         </td>
-                        <td className="px-2 py-2 tabular-nums text-[var(--color-subtle-text)] sm:px-3">
+                        <td className="px-2 py-2 tabular-nums text-[var(--color-subtle-text)] sm:px-3 text-center">
                           {m.ratingBefore}
                         </td>
-                        <td className="navbar-text px-2 py-2 tabular-nums text-[var(--color-primary)] sm:px-3">
+                        <td className="navbar-text px-2 py-2 tabular-nums text-[var(--color-primary)] sm:px-3 text-center">
                           {m.ratingAfter}
                         </td>
                         <td
-                          className={`px-2 py-2 tabular-nums sm:px-3 ${
+                          className={`px-2 py-2 tabular-nums sm:px-3 text-center ${
                             delta >= 0 ? "text-emerald-700 dark:text-emerald-400" : "text-rose-700 dark:text-rose-400"
                           }`}
                         >
