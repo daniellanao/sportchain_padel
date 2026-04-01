@@ -13,7 +13,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="flex min-h-[70vh] flex-col items-center justify-center px-4 py-12">
+    <div className="flex w-full min-w-0 flex-1 flex-col items-stretch">
       {children}
     </div>
   );

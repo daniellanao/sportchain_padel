@@ -1,68 +1,39 @@
 import type { Metadata } from "next";
-import { faTrophy, faUsers } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
+import { Press_Start_2P } from "next/font/google";
 import { redirect } from "next/navigation";
 
-import { adminLogoutAction, isAdminSessionValid } from "@/app/admin/actions";
+import { isAdminSessionValid } from "@/app/admin/actions";
+import { AdminNavbar } from "@/components/admin/AdminNavbar";
+
+const pixel = Press_Start_2P({
+  weight: "400",
+  subsets: ["latin"],
+});
 
 export const metadata: Metadata = {
   title: "Panel",
 };
+
+const pixelBtn =
+  "flex min-h-0 min-w-0 flex-1 items-center justify-center rounded-none border-4 border-[var(--color-primary)] px-1 py-5 text-center text-[0.55rem] leading-snug uppercase tracking-wide text-[var(--color-primary)] shadow-[5px_5px_0_var(--color-primary)] transition hover:brightness-[1.03] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[2px_2px_0_var(--color-primary)] sm:gap-1 sm:py-8 sm:text-xs";
 
 export default async function AdminHomePage() {
   const ok = await isAdminSessionValid();
   if (!ok) redirect("/admin/login");
 
   return (
-    <div className="w-full max-w-sm border-4 border-[var(--color-primary)] bg-[var(--color-surface)] p-4 shadow-[8px_8px_0_rgba(0,0,0,0.25)] sm:max-w-md sm:p-6">
-      <h1 className="logo mb-1 text-center text-2xl uppercase tracking-wide text-[var(--color-primary)]">
-        Admin
-      </h1>
-      <p className="mb-5 text-center text-xs uppercase tracking-[0.12em] text-[color:var(--color-subtle-text)]">
-        Panel mobile
-      </p>
+    <div className="flex w-full flex-col">
+      <AdminNavbar />
 
-      <div className="grid grid-cols-1 gap-3">
-        <Link
-          href="/admin/tournaments"
-          className="group border-4 border-[var(--color-primary)] bg-[var(--color-muted)] px-4 py-4 shadow-[4px_4px_0_rgba(0,0,0,0.2)] transition hover:-translate-y-0.5 hover:bg-[var(--color-accent-gold)]/20"
-        >
-          <span className="flex items-center gap-3">
-            <span className="inline-flex h-9 w-9 items-center justify-center border-2 border-[var(--color-primary)] bg-[var(--color-surface)] text-[var(--color-primary)]">
-              <FontAwesomeIcon icon={faTrophy} className="h-4 w-4" />
-            </span>
-            <span className="navbar-text text-sm uppercase text-[var(--color-primary)]">Torneos</span>
-          </span>
+      <div
+        className={`mx-auto flex w-full max-w-sm flex-row gap-3 px-4 py-8 sm:max-w-md sm:gap-4 ${pixel.className}`}
+      >
+        <Link href="/admin/tournaments" className={`${pixelBtn} bg-[var(--color-accent-gold)]`}>
+          Torneos
         </Link>
-
-        <Link
-          href="/admin/players"
-          className="group border-4 border-[var(--color-primary)] bg-[var(--color-muted)] px-4 py-4 shadow-[4px_4px_0_rgba(0,0,0,0.2)] transition hover:-translate-y-0.5 hover:bg-[var(--color-accent-gold)]/20"
-        >
-          <span className="flex items-center gap-3">
-            <span className="inline-flex h-9 w-9 items-center justify-center border-2 border-[var(--color-primary)] bg-[var(--color-surface)] text-[var(--color-primary)]">
-              <FontAwesomeIcon icon={faUsers} className="h-4 w-4" />
-            </span>
-            <span className="navbar-text text-sm uppercase text-[var(--color-primary)]">Jugadores</span>
-          </span>
-        </Link>
-      </div>
-
-      <div className="mt-5 flex flex-col gap-2">
-        <form action={adminLogoutAction}>
-          <button
-            type="submit"
-            className="navbar-text w-full border-2 border-[var(--color-primary)] bg-background px-4 py-2 text-xs uppercase text-[var(--color-primary)] transition hover:bg-[var(--color-muted)]"
-          >
-            Cerrar sesion
-          </button>
-        </form>
-        <Link
-          href="/"
-          className="navbar-text block border-2 border-[var(--color-primary)] bg-background px-4 py-2 text-center text-xs uppercase text-[var(--color-primary)] transition hover:bg-[var(--color-muted)]"
-        >
-          Volver al sitio
+        <Link href="/admin/players" className={`${pixelBtn} bg-[var(--color-muted)]`}>
+          Jugadores
         </Link>
       </div>
     </div>
