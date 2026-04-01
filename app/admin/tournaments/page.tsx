@@ -6,6 +6,8 @@ import { redirect } from "next/navigation";
 import { isAdminSessionValid } from "@/app/admin/actions";
 import { AdminNavbar } from "@/components/admin/AdminNavbar";
 import { fetchTournamentsListFromSupabase } from "@/lib/tournaments/supabase-list";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
 
 const pixel = Press_Start_2P({
   weight: "400",
@@ -64,17 +66,15 @@ export default async function AdminTournamentsPage() {
       <div
         className={`mx-auto w-full min-w-0 max-w-4xl px-3 pb-10 pt-3 sm:px-4 sm:pb-12 sm:pt-4 ${pixel.className}`}
       >
-        {/* Title + actions: stacked on narrow phones, row of actions matches admin home */}
         <div className="mb-4 flex flex-col gap-3">
+          <h1 className="text-2xl font-black uppercase text-[var(--color-primary)]">Torneos</h1>
           <div className="flex flex-row gap-2 sm:gap-3">
-          <h1 className="">Torneos</h1>          
-            <Link
-              href="/admin/tournaments/create"
-              className={`${headerBtn} bg-[var(--color-accent-gold)]`}
-            >
-              Nuevo Torneo
+            <Link href="/admin/tournaments/create" className={`${headerBtn} bg-[var(--color-accent-gold)]`}>
+              Nuevo
             </Link>
-            
+            <Link href="/admin" className={`${headerBtn} bg-[var(--color-muted)]`}>
+              Inicio
+            </Link>
           </div>
         </div>
 

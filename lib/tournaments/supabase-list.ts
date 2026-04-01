@@ -88,6 +88,11 @@ function normalizeAdminStatus(row: TournamentDbRow): "open" | "finished" {
   return "open";
 }
 
+/** Same rules as `adminStatus` on list items — for admin detail pages. */
+export function normalizeAdminTournamentStatus(row: TournamentDbRow): "open" | "finished" {
+  return normalizeAdminStatus(row);
+}
+
 function rowToTournament(row: TournamentDbRow, listStatus: Tournament["status"]): Tournament {
   const dates = parseStartDate(row.start_date);
   const slug = row.slug?.trim() || `tournament-${row.id}`;
