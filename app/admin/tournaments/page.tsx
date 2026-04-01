@@ -26,9 +26,17 @@ export default async function AdminTournamentsPage() {
     <div className="w-full max-w-4xl rounded-xl border border-foreground/10 bg-surface p-6 shadow-lg sm:p-8">
       <div className="mb-4 flex items-center justify-between gap-3">
         <h1 className="logo text-xl text-primary">Admin / Torneos</h1>
-        <Link href="/admin" className="text-sm text-primary underline-offset-4 hover:underline">
-          Volver al panel
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/admin/tournaments/create"
+            className="rounded border border-foreground/20 bg-background px-2 py-1 text-xs font-medium transition hover:bg-muted"
+          >
+            Nuevo torneo
+          </Link>
+          <Link href="/admin" className="text-sm text-primary underline-offset-4 hover:underline">
+            Volver al panel
+          </Link>
+        </div>
       </div>
 
       {!result.ok ? (
