@@ -25,6 +25,8 @@ export type Tournament = {
   /** Number of rounds (meaning depends on format) */
   rounds: number;
   status: TournamentStatus;
+  /** Supabase `status` normalized for admin: `open` | `finished` */
+  adminStatus?: "open" | "finished";
   /** Public URL — file lives under `public/` (e.g. `/tournaments/aleph_padel_tournament.png`) */
   imageUrl?: string;
   /** Venue / city (e.g. from Supabase `location`) */

@@ -69,12 +69,23 @@ function toFormat(f: string | null): TournamentFormat {
 }
 
 function isPastRow(row: TournamentDbRow, now: number): boolean {
-  if (row.status === "completed") return true;
+  const s = row.status?.trim().toLowerCase();
+  if (row.status === "completed" || s === "finished") return true;
   if (row.end_date) {
     const end = new Date(row.end_date).getTime();
     if (!Number.isNaN(end) && end < now) return true;
   }
   return false;
+}
+
+function normalizeAdminStatus(row: TournamentDbRow): "open" | "finished" {
+  const s = row.status?.trim().toLowerCase() ?? "";
+  if (s === "finished") return "finished";
+  if (s === "completed") return "finished";
+  if (isPastRow(row, Date.now())) return "finished";
+  if (s === "open") return "open";
+  if (s === "draft") return "open";
+  return "open";
 }
 
 function rowToTournament(row: TournamentDbRow, listStatus: Tournament["status"]): Tournament {
@@ -90,6 +101,7 @@ function rowToTournament(row: TournamentDbRow, listStatus: Tournament["status"])
     format: toFormat(row.format),
     rounds: row.total_rounds ?? 0,
     status: listStatus,
+    adminStatus: normalizeAdminStatus(row),
     imageUrl: normalizeImageUrl(row.image),
     location: row.location?.trim() || undefined,
   };
