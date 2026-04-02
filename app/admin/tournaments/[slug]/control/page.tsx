@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 
 import { isAdminSessionValid } from "@/app/admin/actions";
 import { updateMatchControlAction } from "@/app/admin/tournaments/[slug]/control/actions";
+import { AdminNavbar } from "@/components/admin/AdminNavbar";
 import {
   MatchesControlTable,
   type ControlMatchRow,
@@ -144,78 +145,61 @@ export default async function AdminTournamentControlPage({ params, searchParams 
   }));
 
   return (
-    <div className="w-full max-w-6xl">
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <h1 className="logo text-xl text-primary">Control / {tournamentName}</h1>
-        <div className="flex gap-3 text-sm">
-          <Link
-            href={`/admin/tournaments/${slug}`}
-            className="px-4 py-2 bg-[#ffe176] border-2 border-[#69581a] rounded shadow-[2px_2px_0_#bca053] font-bold text-primary text-xs uppercase transition hover:brightness-110 pixel-font"
-            style={{
-              fontFamily: `'Press Start 2P', cursive, monospace`,
-              letterSpacing: '1px',
-              boxShadow: '2px 2px 0 #bca053',
-            }}
-          >
-            <span role="img" aria-label="Trophy" className="mr-2">
-              🏆
-            </span>
-            Detalle torneo
-          </Link>
-          <Link
-            href="/admin/tournaments"
-            className="px-4 py-2 bg-[#c3f1ff] border-2 border-[#307689] rounded shadow-[2px_2px_0_#76bdd8] font-bold text-primary text-xs uppercase transition hover:brightness-110 ml-1 pixel-font"
-            style={{
-              fontFamily: `'Press Start 2P', cursive, monospace`,
-              letterSpacing: '1px',
-              boxShadow: '2px 2px 0 #76bdd8',
-            }}
-          >
-            <span role="img" aria-label="Back" className="mr-2">
-              🎮
-            </span>
-            Volver a torneos
-          </Link>
+    <div className="flex w-full min-w-0 flex-col">
+      <AdminNavbar />
+
+      <div className="mx-auto w-full min-w-0 max-w-6xl px-4 pb-12 pt-4">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <h1 className="logo text-xl text-primary">{tournamentName}</h1>
+          
+          <div className="flex flex-wrap gap-2 sm:gap-3">
+            <Link
+              href={`/admin/tournaments/${slug}`}
+              className="inline-flex items-center justify-center rounded-lg border border-foreground/20 bg-background px-4 py-2.5 text-sm font-medium text-primary transition hover:bg-muted"
+            >
+              Regresar al Detalle
+            </Link>
+          </div>
         </div>
+
+        {uiError ? (
+          <p className="mb-4 rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+            {uiError}
+          </p>
+        ) : null}
+        {success ? (
+          <p className="mb-4 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200">
+            {success}
+          </p>
+        ) : null}
+
+        <StandingsTable rows={standings} title="Standings" />
+
+        {[1, 2, 3, 4].map((round) => {
+          const roundMatches = (matchesByRound.get(round) ?? []).map(
+            (m) =>
+              ({
+                id: m.id,
+                team1Id: m.team1_id,
+                team2Id: m.team2_id,
+                winnerTeamId: m.winner_team_id,
+                team1Games: m.team1_games,
+                team2Games: m.team2_games,
+                finished: m.finished,
+              }) satisfies ControlMatchRow
+          );
+          return (
+            <MatchesControlTable
+              key={round}
+              roundNumber={round}
+              slug={slug}
+              teams={teamOptions}
+              matches={roundMatches}
+              updateAction={updateMatchControlAction}
+            />
+          );
+        })}
       </div>
-
-      {uiError ? (
-        <p className="mb-4 rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-200">
-          {uiError}
-        </p>
-      ) : null}
-      {success ? (
-        <p className="mb-4 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200">
-          {success}
-        </p>
-      ) : null}
-
-      <StandingsTable rows={standings} title="Standings" />
-
-      {[1, 2, 3, 4].map((round) => {
-        const roundMatches = (matchesByRound.get(round) ?? []).map(
-          (m) =>
-            ({
-              id: m.id,
-              team1Id: m.team1_id,
-              team2Id: m.team2_id,
-              winnerTeamId: m.winner_team_id,
-              team1Games: m.team1_games,
-              team2Games: m.team2_games,
-              finished: m.finished,
-            }) satisfies ControlMatchRow
-        );
-        return (
-          <MatchesControlTable
-            key={round}
-            roundNumber={round}
-            slug={slug}
-            teams={teamOptions}
-            matches={roundMatches}
-            updateAction={updateMatchControlAction}
-          />
-        );
-      })}
     </div>
   );
 }

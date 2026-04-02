@@ -61,7 +61,7 @@ export function PlayerSearchPicker({ tournamentId, submitClassName }: Props) {
         try {
           setFetchError(null);
           const res = await fetch(
-            `/api/admin/players/search?q=${encodeURIComponent(t)}&tournamentId=${tournamentId}`,
+            `/admin/api/players/search?q=${encodeURIComponent(t)}&tournamentId=${tournamentId}`,
             { signal: ac.signal, credentials: "same-origin" }
           );
           const json = (await res.json()) as { players?: PlayerSearchRow[]; error?: string };
