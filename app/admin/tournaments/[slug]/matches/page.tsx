@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 
 import { isAdminSessionValid } from "@/app/admin/actions";
 import { createRatingMatchAction } from "@/app/admin/tournaments/[slug]/matches/actions";
+import { AdminNavbar } from "@/components/admin/AdminNavbar";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -112,113 +113,120 @@ export default async function AdminTournamentMatchesPage({ params, searchParams 
   );
 
   return (
-    <div className="w-full max-w-5xl">
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <h1 className="logo text-xl text-primary">Partidos / {tournamentName}</h1>
-        <div className="flex flex-wrap gap-3 text-sm">
-          <Link
-            href={`/admin/tournaments/${slug}`}
-            className="text-primary underline-offset-4 hover:underline"
-          >
-            Detalle torneo
-          </Link>
-          <Link
-            href={`/admin/tournaments/${slug}/control`}
-            className="text-primary underline-offset-4 hover:underline"
-          >
-            Control
-          </Link>
-          <Link href="/admin/tournaments" className="text-primary underline-offset-4 hover:underline">
-            Torneos
-          </Link>
-        </div>
-      </div>
+    <div className="flex w-full min-w-0 flex-col">
+      <AdminNavbar />
 
-      {uiError ? (
-        <p className="mb-4 rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-200">
-          {uiError}
-        </p>
-      ) : null}
-      {success ? (
-        <p className="mb-4 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200">
-          {success}
-        </p>
-      ) : null}
+      <div className="mx-auto w-full min-w-0 max-w-5xl px-4 pb-12 pt-4 sm:px-6">
+        <div className="rounded-xl border border-foreground/10 bg-surface p-6 shadow-lg sm:p-8">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <h1 className="logo text-xl text-primary">Partidos / {tournamentName}</h1>
+            <div className="flex flex-wrap gap-3 text-sm">
+              <Link
+                href={`/admin/tournaments/${slug}`}
+                className="admin-link-btn"
+              >
+                Detalle torneo
+              </Link>
 
-      <div className="overflow-hidden rounded-lg border border-foreground/10">
-        <table className="w-full min-w-[640px] border-collapse text-left text-sm">
-          <thead>
-            <tr className="border-b border-foreground/10 bg-[var(--color-muted)]">
-              <th className="px-3 py-2 font-semibold">Ronda</th>
-              <th className="px-3 py-2 font-semibold">Equipo 1</th>
-              <th className="px-3 py-2 text-center font-semibold">G1</th>
-              <th className="px-3 py-2 text-center font-semibold">G2</th>
-              <th className="px-3 py-2 font-semibold">Equipo 2</th>
-              <th className="px-3 py-2 font-semibold">Estado</th>
-              <th className="px-3 py-2 font-semibold">Rating</th>
-            </tr>
-          </thead>
-          <tbody>
-            {matches.length === 0 ? (
-              <tr>
-                <td colSpan={7} className="px-3 py-6 text-[color:var(--color-subtle-text)]">
-                  No hay partidos para este torneo.
-                </td>
-              </tr>
-            ) : (
-              matches.map((m, i) => (
-                <tr
-                  key={m.id}
-                  className={
-                    i % 2 === 0
-                      ? "border-t border-foreground/10 bg-[var(--color-surface)]"
-                      : "border-t border-foreground/10 bg-[var(--color-muted)]/25"
-                  }
-                >
-                  <td className="whitespace-nowrap px-3 py-2 font-mono tabular-nums">{m.round_number}</td>
-                  <td className="max-w-[200px] truncate px-3 py-2">{teamLabel(m.team1_id, teamNameById)}</td>
-                  <td className="px-3 py-2 text-center font-mono tabular-nums">{m.team1_games}</td>
-                  <td className="px-3 py-2 text-center font-mono tabular-nums">{m.team2_games}</td>
-                  <td className="max-w-[200px] truncate px-3 py-2">{teamLabel(m.team2_id, teamNameById)}</td>
-                  <td className="px-3 py-2 text-xs text-[color:var(--color-subtle-text)]">
-                    {m.finished ? "Finalizado" : "Pendiente"}
-                    {m.status ? ` · ${m.status}` : ""}
-                  </td>
-                  <td className="whitespace-nowrap px-3 py-2">
-                    {m.finished ? (
-                      ratingSourceIds.has(m.id) ? (
-                        <span className="text-xs text-[color:var(--color-subtle-text)]">Created</span>
-                      ) : (
-                        <form action={createRatingMatchAction} className="inline">
-                          <input type="hidden" name="slug" value={slug} />
-                          <input type="hidden" name="tournamentId" value={tournamentId} />
-                          <input type="hidden" name="sourceMatchId" value={m.id} />
-                          <button
-                            type="submit"
-                            className="rounded border border-foreground/20 bg-background px-2 py-1 text-xs font-medium text-foreground transition hover:bg-[var(--color-muted)]"
-                          >
-                            Create Rating Match
-                          </button>
-                        </form>
-                      )
-                    ) : (
-                      <span className="text-xs text-[color:var(--color-subtle-text)]">—</span>
-                    )}
-                  </td>
+              
+             
+            </div>
+          </div>
+
+          <p
+            role="status"
+            className="mb-4 rounded-lg border border-primary/25 bg-muted/60 px-3 py-2.5 text-sm text-[color:var(--color-foreground)]"
+          >
+            Esta página es para procesar los partidos y calcular ELO.
+          </p>
+
+          {uiError ? (
+            <p className="mb-4 rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+              {uiError}
+            </p>
+          ) : null}
+          {success ? (
+            <p className="mb-4 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200">
+              {success}
+            </p>
+          ) : null}
+
+          <div className="overflow-hidden rounded-lg border border-foreground/10">
+            <table className="w-full min-w-[640px] border-collapse text-left text-sm">
+              <thead>
+                <tr className="border-b border-foreground/10 bg-[var(--color-muted)]">
+                  <th className="px-3 py-2 font-semibold">Ronda</th>
+                  <th className="px-3 py-2 font-semibold">Equipo 1</th>
+                  <th className="px-3 py-2 text-center font-semibold">G1</th>
+                  <th className="px-3 py-2 text-center font-semibold">G2</th>
+                  <th className="px-3 py-2 font-semibold">Equipo 2</th>
+                  <th className="px-3 py-2 font-semibold">Estado</th>
+                  <th className="px-3 py-2 font-semibold">Rating</th>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+              </thead>
+              <tbody>
+                {matches.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="px-3 py-6 text-[color:var(--color-subtle-text)]">
+                      No hay partidos para este torneo.
+                    </td>
+                  </tr>
+                ) : (
+                  matches.map((m, i) => (
+                    <tr
+                      key={m.id}
+                      className={
+                        i % 2 === 0
+                          ? "border-t border-foreground/10 bg-[var(--color-surface)]"
+                          : "border-t border-foreground/10 bg-[var(--color-muted)]/25"
+                      }
+                    >
+                      <td className="whitespace-nowrap px-3 py-2 font-mono tabular-nums">{m.round_number}</td>
+                      <td className="max-w-[200px] truncate px-3 py-2">{teamLabel(m.team1_id, teamNameById)}</td>
+                      <td className="px-3 py-2 text-center font-mono tabular-nums">{m.team1_games}</td>
+                      <td className="px-3 py-2 text-center font-mono tabular-nums">{m.team2_games}</td>
+                      <td className="max-w-[200px] truncate px-3 py-2">{teamLabel(m.team2_id, teamNameById)}</td>
+                      <td className="px-3 py-2 text-xs text-[color:var(--color-subtle-text)]">
+                        {m.finished ? "Finalizado" : "Pendiente"}
+                        {m.status ? ` · ${m.status}` : ""}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-2">
+                        {m.finished ? (
+                          ratingSourceIds.has(m.id) ? (
+                            <span className="text-xs text-[color:var(--color-subtle-text)]">Created</span>
+                          ) : (
+                            <form action={createRatingMatchAction} className="inline">
+                              <input type="hidden" name="slug" value={slug} />
+                              <input type="hidden" name="tournamentId" value={tournamentId} />
+                              <input type="hidden" name="sourceMatchId" value={m.id} />
+                              <button
+                                type="submit"
+                                className="rounded border border-foreground/20 bg-background px-2 py-1 text-xs font-medium text-foreground transition hover:bg-[var(--color-muted)]"
+                              >
+                                Create Rating Match
+                              </button>
+                            </form>
+                          )
+                        ) : (
+                          <span className="text-xs text-[color:var(--color-subtle-text)]">—</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
 
-      <div className="mt-6 flex justify-end">
-        <button
-          type="button"
-          className="rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
-        >
-          Procesar
-        </button>
+          <div className="mt-6 flex justify-end">
+            <button
+              type="button"
+              className="rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
+            >
+              Procesar
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

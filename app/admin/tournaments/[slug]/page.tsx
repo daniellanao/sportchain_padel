@@ -23,15 +23,6 @@ export const metadata: Metadata = {
 
 const card = "rounded-xl border border-foreground/10 bg-surface shadow-sm";
 
-const linkBtn =
-  "inline-flex flex-1 items-center justify-center rounded-lg border border-foreground/20 bg-background px-3 py-2.5 text-center text-sm font-medium text-primary transition hover:bg-muted sm:flex-none sm:min-w-[7rem]";
-
-const submitBtn =
-  "shrink-0 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:pointer-events-none disabled:opacity-40 sm:self-stretch";
-
-const dangerBtn =
-  "rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-1.5 text-sm font-medium text-red-700 transition hover:bg-red-500/20 dark:text-red-200";
-
 function StatusLabel({ status }: { status: "open" | "finished" }) {
   if (status === "open") {
     return (
@@ -144,20 +135,20 @@ export default async function AdminTournamentDetailPage({ params, searchParams }
           </div>
           <Link
             href="/admin/tournaments"
-            className="text-sm text-primary underline-offset-4 hover:underline"
+            className="admin-link-btn"
           >
             Volver a torneos
           </Link>
         </div>
 
         <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-          <Link href={`/admin/tournaments/${slug}/teams`} className={linkBtn}>
+          <Link href={`/admin/tournaments/${slug}/teams`} className="admin-link-btn">
             Equipos
           </Link>
-          <Link href={`/admin/tournaments/${slug}/control`} className={linkBtn}>
+          <Link href={`/admin/tournaments/${slug}/control`} className="admin-link-btn">
             Control
           </Link>
-          <Link href={`/admin/tournaments/${slug}/matches`} className={linkBtn}>
+          <Link href={`/admin/tournaments/${slug}/matches`} className="admin-link-btn">
             Partidos
           </Link>
         </div>
@@ -223,7 +214,7 @@ export default async function AdminTournamentDetailPage({ params, searchParams }
             <p className="mb-3 text-sm text-[color:var(--color-subtle-text)]">
               Busca por texto o ID; solo se cargan coincidencias (max. 25), sin listar toda la base.
             </p>
-            <PlayerSearchPicker tournamentId={tournament.id} submitClassName={submitBtn} />
+            <PlayerSearchPicker tournamentId={tournament.id} submitClassName="admin-submit-btn" />
           </form>
 
           {relations.length === 0 ? (
@@ -247,7 +238,7 @@ export default async function AdminTournamentDetailPage({ params, searchParams }
                     <form action={removePlayerFromTournamentAction} className="shrink-0 sm:ml-2">
                       <input type="hidden" name="slug" value={slug} />
                       <input type="hidden" name="playerTournamentId" value={r.id} />
-                      <button type="submit" className={dangerBtn}>
+                      <button type="submit" className="admin-danger-btn">
                         Quitar
                       </button>
                     </form>

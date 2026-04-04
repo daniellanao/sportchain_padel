@@ -69,11 +69,9 @@ export default async function AdminTournamentTeamsPage({ params, searchParams }:
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <h1 className="logo text-xl text-primary">Equipos</h1>
             <div className="flex gap-3 text-sm">
-              <Link href={`/admin/tournaments/${slug}`} className="text-primary underline-offset-4 hover:underline">
+              <Link href={`/admin/tournaments/${slug}`} 
+              className="admin-link-btn">
                 Volver al torneo
-              </Link>
-              <Link href="/admin/tournaments" className="text-primary underline-offset-4 hover:underline">
-                Volver a torneos
               </Link>
             </div>
           </div>

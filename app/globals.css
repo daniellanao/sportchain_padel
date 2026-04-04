@@ -92,6 +92,21 @@ h1, h2, h3, h4, h5, h6 {
   color: #0a162b;
 }
 
+/* Admin: shared controls (links as buttons, primary submit, danger) */
+@layer components {
+  .admin-link-btn {
+    @apply inline-flex flex-1 items-center justify-center rounded-lg border border-foreground/20 bg-background px-3 py-2.5 text-center text-sm font-medium text-primary transition hover:bg-muted sm:flex-none sm:min-w-[7rem];
+  }
+
+  .admin-submit-btn {
+    @apply shrink-0 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:pointer-events-none disabled:opacity-40 sm:self-stretch;
+  }
+
+  .admin-danger-btn {
+    @apply rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-1.5 text-sm font-medium text-red-700 transition hover:bg-red-500/20 dark:text-red-200;
+  }
+}
+
 .golden-circle {
   background-color: var(--color-accent-gold);
   color: var(--color-primary);
