@@ -19,6 +19,29 @@ function baseTournamentPath(slug: string): string {
   return `/admin/tournaments/${slug}/teams`;
 }
 
+/** First names only, order matches form selection (before id normalization). */
+async function defaultTeamNameFromSelection(
+  supabase: NonNullable<ReturnType<typeof createSupabaseServerClient>>,
+  firstSelectedId: number,
+  secondSelectedId: number
+): Promise<string | null> {
+  const { data, error } = await supabase
+    .from("players")
+    .select("id, name")
+    .in("id", [firstSelectedId, secondSelectedId]);
+  if (error || !data?.length) return null;
+  const map = new Map<number, string>();
+  for (const row of data as { id: number; name: string }[]) {
+    map.set(row.id, String(row.name ?? "").trim());
+  }
+  const n1 = map.get(firstSelectedId) ?? "";
+  const n2 = map.get(secondSelectedId) ?? "";
+  if (!n1 && !n2) return null;
+  if (!n1) return n2;
+  if (!n2) return n1;
+  return `${n1} & ${n2}`;
+}
+
 export async function createTeamAction(formData: FormData): Promise<void> {
   const ok = await isAdminSessionValid();
   if (!ok) redirect("/admin/login");
@@ -27,8 +50,6 @@ export async function createTeamAction(formData: FormData): Promise<void> {
   const tournamentId = toInt(formData.get("tournamentId"));
   const rawP1 = toInt(formData.get("player1Id"));
   const rawP2 = toInt(formData.get("player2Id"));
-  const teamName = String(formData.get("teamName") ?? "").trim() || null;
-  const status = String(formData.get("status") ?? "").trim() || "registered";
 
   if (!slug || !tournamentId || !rawP1 || !rawP2) redirect("/admin/tournaments");
   if (rawP1 === rawP2) {
@@ -41,12 +62,14 @@ export async function createTeamAction(formData: FormData): Promise<void> {
     redirect(`${baseTournamentPath(slug)}?error=Configuracion+de+Supabase+incompleta`);
   }
 
+  const teamName = await defaultTeamNameFromSelection(supabase, rawP1, rawP2);
+
   const { error } = await supabase.from("teams").insert({
     tournament_id: tournamentId,
     player1_id: player1Id,
     player2_id: player2Id,
     team_name: teamName,
-    status,
+    status: "registered",
   });
 
   if (error) {
@@ -65,8 +88,7 @@ export async function updateTeamAction(formData: FormData): Promise<void> {
   const teamId = toInt(formData.get("teamId"));
   const rawP1 = toInt(formData.get("player1Id"));
   const rawP2 = toInt(formData.get("player2Id"));
-  const teamName = String(formData.get("teamName") ?? "").trim() || null;
-  const status = String(formData.get("status") ?? "").trim() || "registered";
+  const teamNameRaw = String(formData.get("teamName") ?? "").trim();
 
   if (!slug || !teamId || !rawP1 || !rawP2) redirect("/admin/tournaments");
   if (rawP1 === rawP2) {
@@ -79,13 +101,18 @@ export async function updateTeamAction(formData: FormData): Promise<void> {
     redirect(`${baseTournamentPath(slug)}?error=Configuracion+de+Supabase+incompleta`);
   }
 
+  let teamName: string | null = teamNameRaw || null;
+  if (!teamName) {
+    teamName = await defaultTeamNameFromSelection(supabase, rawP1, rawP2);
+  }
+
   const { error } = await supabase
     .from("teams")
     .update({
       player1_id: player1Id,
       player2_id: player2Id,
       team_name: teamName,
-      status,
+      status: "registered",
       updated_at: new Date().toISOString(),
     })
     .eq("id", teamId);
