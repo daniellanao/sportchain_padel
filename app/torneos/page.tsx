@@ -51,7 +51,7 @@ export default async function TournamentsPage() {
             <p className="text-sm text-[var(--color-subtle-text)]">No hay torneos próximos.</p>
           ) : (
             <ul
-              className="grid list-none grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+              className="grid list-none grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2"
               role="list"
             >
               {upcoming.map((t) => (
@@ -69,7 +69,7 @@ export default async function TournamentsPage() {
             <p className="text-sm text-[var(--color-subtle-text)]">Aún no hay torneos finalizados.</p>
           ) : (
             <ul
-              className="grid list-none grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+              className="grid list-none grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-4"
               role="list"
             >
               {past.map((t) => (
