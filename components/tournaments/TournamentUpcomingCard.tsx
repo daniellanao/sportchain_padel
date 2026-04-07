@@ -16,7 +16,7 @@ export type TournamentUpcomingCardProps = {
 };
 
 /**
- * Tarjeta enlazada para la cuadrícula de torneos próximos en `/torneos`.
+ * Tarjeta para la cuadrícula de torneos próximos en `/torneos`.
  */
 export function TournamentUpcomingCard({ tournament: t }: TournamentUpcomingCardProps) {
   return (
@@ -24,10 +24,7 @@ export function TournamentUpcomingCard({ tournament: t }: TournamentUpcomingCard
       data-slug={t.slug}
       className="flex flex-col border-4 border-[var(--color-primary)] bg-[var(--color-muted)]/50 p-4 shadow-[6px_6px_0_rgba(0,0,0,0.15)] sm:p-5"
     >
-      <Link
-        href={`/torneos/${t.slug}`}
-        className="group flex min-h-0 flex-1 flex-col gap-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent-gold)] sm:flex-row sm:items-stretch sm:gap-5"
-      >
+      <div className="group flex min-h-0 flex-1 flex-col gap-4 sm:flex-row sm:items-stretch sm:gap-5">
         {t.imageUrl ? (
           <div className="relative aspect-[16/10] w-full shrink-0 overflow-hidden border-2 border-[var(--color-accent-gold)] bg-[var(--color-surface)] sm:aspect-[3/4] sm:w-44 md:w-52">
             <Image
@@ -46,9 +43,12 @@ export function TournamentUpcomingCard({ tournament: t }: TournamentUpcomingCard
             <h5 className="mb-1 block text-sm font-bold uppercase text-[var(--color-primary)]">
               Próximamente
             </h5>
-            <h3 className="block min-w-0 flex-1 text-base font-black uppercase leading-tight text-[var(--color-primary)] group-hover:underline sm:text-lg">
+            <Link
+              href={`/torneos/${t.slug}`}
+              className="block min-w-0 flex-1 text-base font-black uppercase leading-tight text-[var(--color-primary)] hover:underline sm:text-lg"
+            >
               {t.name}
-            </h3>
+            </Link>
            
           </div>
 
@@ -133,11 +133,22 @@ export function TournamentUpcomingCard({ tournament: t }: TournamentUpcomingCard
               </tr>
             </tbody>
           </table>
-          <span className="navbar-text btn-gold mt-4 inline-flex min-h-[40px] w-full items-center justify-center border-2 border-[var(--color-accent-gold)] px-4 py-2 text-center text-xs uppercase">
+          <Link
+            href={`/torneos/${t.slug}`}
+            className="navbar-text btn-gold mt-4 inline-flex min-h-[40px] w-full items-center justify-center border-2 border-[var(--color-accent-gold)] px-4 py-2 text-center text-xs uppercase"
+          >
             Ver torneo
-          </span>
+          </Link>
+          <Link
+            href="https://luma.com/xbjrsgc3"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="navbar-text btn-gold mt-4 inline-flex min-h-[40px] w-full items-center justify-center border-2 border-[var(--color-accent-gold)] px-4 py-2 text-center text-xs uppercase"
+          >
+            Inscribirse
+          </Link>
         </div>
-      </Link>
+      </div>
     </li>
   );
 }
