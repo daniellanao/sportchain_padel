@@ -220,32 +220,67 @@ export default async function AdminTournamentDetailPage({ params, searchParams }
           {relations.length === 0 ? (
             <p className="text-sm text-[color:var(--color-subtle-text)]">No hay jugadores inscritos.</p>
           ) : (
-            <ul className="flex list-none flex-col gap-2">
-              {relations.map((r) => (
-                <li key={r.id}>
-                  <div className="flex flex-col gap-2 rounded-lg border border-foreground/10 bg-background/30 px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4">
-                    <div className="min-w-0 text-sm text-foreground">
-                      {(() => {
+            <>
+              <p className="mb-2 text-xs text-[color:var(--color-subtle-text)]">
+                <span className="tabular-nums font-medium text-foreground">{relations.length}</span>{" "}
+                {relations.length === 1 ? "jugador inscrito" : "jugadores inscritos"}.
+              </p>
+              <div className="overflow-hidden rounded-lg border border-foreground/10">
+                <div className="max-h-[min(55vh,480px)] overflow-auto">
+                  <table className="w-full border-collapse text-left text-[11px] sm:text-xs">
+                    <thead className="sticky top-0 z-[1] border-b border-foreground/10 bg-muted/90 backdrop-blur-sm">
+                      <tr>
+                        <th className="w-8 whitespace-nowrap px-1.5 py-1.5 text-center font-semibold tabular-nums text-[color:var(--color-subtle-text)]">
+                          #
+                        </th>
+                        <th className="px-2 py-1.5 font-semibold uppercase tracking-wide text-[color:var(--color-subtle-text)]">
+                          Jugador
+                        </th>
+                        <th className="whitespace-nowrap px-2 py-1.5 text-right font-semibold uppercase tracking-wide text-[color:var(--color-subtle-text)]">
+                          Rating
+                        </th>
+                        <th className="w-px whitespace-nowrap px-2 py-1.5 text-right font-semibold uppercase text-[color:var(--color-subtle-text)]">
+                          Acción
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {relations.map((r, index) => {
                         const player = getRelationPlayer(r.players);
+                        const label = player
+                          ? `${player.name} ${player.lastname}`
+                          : `Jugador #${r.player_id}`;
                         return (
-                          <>
-                            {player ? `${player.name} ${player.lastname}` : `Jugador #${r.player_id}`}{" "}
-                            <span className="text-[color:var(--color-subtle-text)]">({r.status})</span>
-                          </>
+                          <tr
+                            key={r.id}
+                            className="border-b border-foreground/5 last:border-0 hover:bg-muted/40"
+                          >
+                            <td className="px-1.5 py-1 text-center align-middle tabular-nums text-[color:var(--color-subtle-text)]">
+                              {index + 1}
+                            </td>
+                            <td className="max-w-[14rem] truncate px-2 py-1 align-middle font-medium text-foreground" title={label}>
+                              {label}
+                            </td>
+                            <td className="whitespace-nowrap px-2 py-1 text-right align-middle tabular-nums font-medium text-foreground">
+                              {player != null && player.rating != null ? player.rating : "—"}
+                            </td>
+                            <td className="whitespace-nowrap px-2 py-1 text-right align-middle">
+                              <form action={removePlayerFromTournamentAction} className="inline">
+                                <input type="hidden" name="slug" value={slug} />
+                                <input type="hidden" name="playerTournamentId" value={r.id} />
+                                <button type="submit" className="admin-danger-btn py-1 text-[10px] sm:text-xs">
+                                  Quitar
+                                </button>
+                              </form>
+                            </td>
+                          </tr>
                         );
-                      })()}
-                    </div>
-                    <form action={removePlayerFromTournamentAction} className="shrink-0 sm:ml-2">
-                      <input type="hidden" name="slug" value={slug} />
-                      <input type="hidden" name="playerTournamentId" value={r.id} />
-                      <button type="submit" className="admin-danger-btn">
-                        Quitar
-                      </button>
-                    </form>
-                  </div>
-                </li>
-              ))}
-            </ul>
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </>
           )}
         </section>
       </div>

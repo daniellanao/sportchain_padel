@@ -139,6 +139,8 @@ export default async function AdminTournamentControlPage({ params, searchParams 
     if (!matchesByRound.has(m.round_number)) matchesByRound.set(m.round_number, []);
     matchesByRound.get(m.round_number)!.push(m);
   }
+  const roundNumbers = [...matchesByRound.keys()].sort((a, b) => a - b);
+
   const teamOptions: ControlTeamOption[] = teams.map((t) => ({
     id: t.id,
     name: teamNameById.get(t.id) ?? `Team #${t.id}`,
@@ -175,7 +177,7 @@ export default async function AdminTournamentControlPage({ params, searchParams 
 
         <StandingsTable rows={standings} title="Standings" />
 
-        {[1, 2, 3, 4].map((round) => {
+        {roundNumbers.map((round) => {
           const roundMatches = (matchesByRound.get(round) ?? []).map(
             (m) =>
               ({
