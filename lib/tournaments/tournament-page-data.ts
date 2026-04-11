@@ -104,11 +104,7 @@ export async function fetchTournamentPageData(slug: string): Promise<TournamentP
   let teams: TournamentTeam[] = [];
   let playersById = new Map<number, BasicPlayer>();
   let standingsRows: StandingsTableRow[] = [];
-  let roundMatchesRounds: RoundMatchesRound[] = Array.from({ length: 4 }, (_, i) => ({
-    roundNumber: i + 1,
-    label: `Ronda ${i + 1}`,
-    matches: [],
-  }));
+  let roundMatchesRounds: RoundMatchesRound[] = [];
 
   if (Number.isInteger(tournamentId) && tournamentId > 0) {
     const supabase = createSupabaseServerClient();
@@ -205,7 +201,8 @@ export async function fetchTournamentPageData(slug: string): Promise<TournamentP
         matchesByRound.get(r)!.push(m);
       }
 
-      roundMatchesRounds = [1, 2, 3, 4].map((rn) => ({
+      const roundNumbers = [...matchesByRound.keys()].sort((a, b) => a - b);
+      roundMatchesRounds = roundNumbers.map((rn) => ({
         roundNumber: rn,
         label: `Ronda ${rn}`,
         matches: (matchesByRound.get(rn) ?? []).map((m) => ({
