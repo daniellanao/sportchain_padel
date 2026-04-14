@@ -140,7 +140,7 @@ export function TournamentUpcomingCard({ tournament: t }: TournamentUpcomingCard
             Ver torneo
           </Link>
           <Link
-            href="https://luma.com/xbjrsgc3"
+            href="https://luma.com/vrmjtbg2"
             target="_blank"
             rel="noopener noreferrer"
             className="navbar-text btn-gold mt-4 inline-flex min-h-[40px] w-full items-center justify-center border-2 border-[var(--color-accent-gold)] px-4 py-2 text-center text-xs uppercase"
