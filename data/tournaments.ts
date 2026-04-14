@@ -33,7 +33,25 @@ export type Tournament = {
   location?: string;
   /** Minimum ELO required to register (optional) */
   minElo?: number;
+  /** Categoría opcional (p. ej. mensaje WhatsApp por defecto) */
+  category?: string;
+  /**
+   * Texto completo para prellenar WhatsApp si enlazas `wa.me` desde la UI.
+   * Si no se define, usa {@link getTournamentWhatsappMessage}.
+   */
+  whatsappMessage?: string;
 };
+
+/**
+ * Mensaje por defecto para WhatsApp (torneos tipo {@link Tournament}).
+ */
+export function getTournamentWhatsappMessage(t: Tournament): string {
+  const custom = t.whatsappMessage?.trim();
+  if (custom) return custom;
+  const cat = t.category?.trim() || "—";
+  const venue = t.location?.trim() || "—";
+  return `Estoy interesado en participar en el torneo "${t.name}". Fecha: ${t.dateLabel}. Hora: ${t.timeLabel}. Categoría: ${cat}. Sede: ${venue}.`;
+}
 
 /** Human-readable format line for cards and detail pages */
 export function formatTournamentFormatLabel(t: Tournament): string {
@@ -65,3 +83,52 @@ export const PAST_TOURNAMENTS: Tournament[] = [];
 export function getTournamentBySlug(slug: string): Tournament | undefined {
   return [...UPCOMING_TOURNAMENTS, ...PAST_TOURNAMENTS].find((t) => t.slug === slug);
 }
+
+/**
+ * Eventos promocionados en `/torneos` (sin ficha en Supabase / detalle interno).
+ * CTA típico: WhatsApp u otro canal externo.
+ */
+export type CommunityTournament = {
+  id: string;
+  name: string;
+  dateLabel: string;
+  timeLabel: string;
+  /** Texto libre, p. ej. «Formato americano» */
+  formatLabel: string;
+  category: string;
+  /** Sede / dirección corta */
+  venue: string;
+  organizer: string;
+  /** E.164 con + para mostrar; el enlace wa.me usa solo dígitos */
+  whatsappE164: string;
+  imageUrl?: string;
+  /**
+   * Texto completo para prellenar WhatsApp (`wa.me/?text=`).
+   * Si no se define, se usa {@link getCommunityTournamentWhatsappMessage}.
+   */
+  whatsappMessage?: string;
+};
+
+/**
+ * Mensaje por defecto para el CTA de WhatsApp (nombre, fecha, hora, categoría, sede).
+ */
+export function getCommunityTournamentWhatsappMessage(t: CommunityTournament): string {
+  const custom = t.whatsappMessage?.trim();
+  if (custom) return custom;
+  return `Estoy interesado en participar en el *${t.name} ${t.category}* del ${t.dateLabel} - ${t.timeLabel} en ${t.venue}. Enviado desde Sportchain`;
+}
+
+export const COMMUNITY_UPCOMING_TOURNAMENTS: CommunityTournament[] = [
+  {
+    id: "torneo-americano-2026-04-18-adictos",
+    name: "Torneo Americano",
+    dateLabel: "18 de abril de 2026",
+    timeLabel: "17:00",
+    formatLabel: "Formato americano",
+    category: "Caballeros 6.ª",
+    venue: "Sportium Alcorta",
+    organizer: "Adictos al pádel",
+    whatsappE164: "+5491139409498",
+    imageUrl: "/torneos/aleph_padel_tournament.png",
+  },
+];
