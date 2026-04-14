@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { Navbar } from "@/components/Navbar";
+import { SportchainAbout } from "@/components/SportchainAbout";
 import { fetchPlayersListFromSupabase } from "@/lib/ranking/supabase-players";
 
 const description =
@@ -47,6 +48,8 @@ export default async function RankingPage() {
         <h1 className="text-2xl font-black uppercase text-[var(--color-primary)] sm:text-3xl">
           Ranking
         </h1>
+
+        
 
         {!result.ok ? (
           <p className="mt-4 rounded border-2 border-amber-600/60 bg-amber-950/20 px-4 py-3 text-sm text-amber-100">
@@ -131,6 +134,9 @@ export default async function RankingPage() {
           </table>
         </div>
       </main>
+      <div className="mx-auto max-w-6xl px-4 pb-4 pt-8 sm:px-6 sm:pt-10">
+        <SportchainAbout />
+      </div>
     </div>
   );
 }

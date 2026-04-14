@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { Navbar } from "@/components/Navbar";
+import { SportchainAbout } from "@/components/SportchainAbout";
 import { TournamentPastCard } from "@/components/tournaments/TournamentPastCard";
 import { TournamentUpcomingCard } from "@/components/tournaments/TournamentUpcomingCard";
 import { fetchTournamentsListFromSupabase } from "@/lib/tournaments/supabase-list";
@@ -36,6 +37,8 @@ export default async function TournamentsPage() {
         <h1 className="text-2xl font-black uppercase text-[var(--color-primary)] sm:text-3xl">
           Torneos
         </h1>
+
+        
 
         {!result.ok ? (
           <p className="mt-4 rounded border-2 border-amber-600/60 bg-amber-950/20 px-4 py-3 text-sm text-amber-100">
@@ -79,6 +82,9 @@ export default async function TournamentsPage() {
           )}
         </section>
       </main>
+      <div className="mx-auto max-w-6xl px-4 pb-4 pt-8 sm:px-6 sm:pt-10">
+        <SportchainAbout />
+      </div>
     </div>
   );
 }

@@ -1,11 +1,15 @@
 /**
  * Site-wide SEO / URL helpers.
- * Set `NEXT_PUBLIC_SITE_URL` in production (no trailing slash), e.g. https://sportchain.example.com
+ *
+ * URL canónica en la nube: https://padel.sportchain.io
+ * Opcional: `NEXT_PUBLIC_SITE_URL` (sin barra final) para staging u override local.
  */
-export const SITE_NAME = "Padel Sportchain | Ranking y Torneos";
+export const PRODUCTION_SITE_URL = "https://padel.sportchain.io" as const;
+
+export const SITE_NAME = "Padel - Sportchain - Ranking y Torneos";
 
 export const SITE_DESCRIPTION =
-  "Plataforma oficial de eventos de padel de Sportchain: consulta torneos de pádel, clasificaciones en tiempo real y ranking ELO. Sigue el sistema suizo, resultados y la tabla de jugadores en un solo lugar.";
+  "Comunidad de Padel de Sportchain: Ranking de Jugadores y Torneos"
 
 export const SITE_KEYWORDS = [
   "Sportchain",
@@ -23,8 +27,10 @@ export const SITE_KEYWORDS = [
 export const DEFAULT_OG_IMAGE_PATH = "/sportchain_padel_ranking_bg.png";
 
 export function getSiteUrl(): string {
-  const raw = process.env.NEXT_PUBLIC_SITE_URL?.trim() || "http://localhost:3000";
-  return raw.replace(/\/$/, "");
+  const fromEnv = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (fromEnv) return fromEnv.replace(/\/$/, "");
+  if (process.env.NODE_ENV === "production") return PRODUCTION_SITE_URL;
+  return "http://localhost:3000";
 }
 
 export function absoluteUrl(path: string): string {

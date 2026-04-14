@@ -93,6 +93,7 @@ const websiteJsonLd = {
   publisher: {
     "@type": "Organization",
     name: "Sportchain",
+    url: siteUrl,
   },
 };
 

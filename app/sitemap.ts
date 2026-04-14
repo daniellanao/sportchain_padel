@@ -1,7 +1,6 @@
 import type { MetadataRoute } from "next";
 
 import { PAST_TOURNAMENTS, UPCOMING_TOURNAMENTS } from "@/data/tournaments";
-import { fetchPlayersListFromSupabase } from "@/lib/ranking/supabase-players";
 import { absoluteUrl, getSiteUrl } from "@/lib/site-config";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -29,17 +28,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  const playersResult = await fetchPlayersListFromSupabase();
-  const rankingPlayerRoutes: MetadataRoute.Sitemap =
-    playersResult.ok && playersResult.players.length > 0
-      ? playersResult.players.map((p) => ({
-          url: absoluteUrl(`/ranking/${p.id}`),
-          lastModified: now,
-          changeFrequency: "weekly" as const,
-          priority: 0.65,
-        }))
-      : [];
-
   const tournamentRoutes: MetadataRoute.Sitemap = [
     ...UPCOMING_TOURNAMENTS,
     ...PAST_TOURNAMENTS,
@@ -50,5 +38,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.75,
   }));
 
-  return [...staticRoutes, ...rankingPlayerRoutes, ...tournamentRoutes];
+  return [...staticRoutes, ...tournamentRoutes];
 }
