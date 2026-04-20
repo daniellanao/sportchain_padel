@@ -58,7 +58,7 @@ export function formatTournamentFormatLabel(t: Tournament): string {
   if (t.format === "american") {
     return `American format · ${t.rounds} rounds`;
   }
-  return `Swiss system · ${t.rounds} rounds`;
+  return `Formato · ${t.rounds} Rondas`;
 }
 
 export const UPCOMING_TOURNAMENTS: Tournament[] = [
@@ -119,6 +119,7 @@ export function getCommunityTournamentWhatsappMessage(t: CommunityTournament): s
 }
 
 export const COMMUNITY_UPCOMING_TOURNAMENTS: CommunityTournament[] = [
+  /**
   {
     id: "torneo-mixto-2026-04-18-adictos",
     name: "Torneo Mixto",
@@ -166,5 +167,5 @@ export const COMMUNITY_UPCOMING_TOURNAMENTS: CommunityTournament[] = [
     organizer: "Adictos al pádel",
     whatsappE164: "+5491139409498",
     imageUrl: "/torneos/aleph_padel_tournament.png",
-  },
+  }, */
 ];
