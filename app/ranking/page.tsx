@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { faStar } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 
 import { Navbar } from "@/components/Navbar";
@@ -112,6 +114,16 @@ export default async function RankingPage() {
                     </td>
                     <td className="w-[40%] truncate px-2 py-1.5 font-medium text-[var(--color-foreground)] sm:px-2.5">
                       {player.name} {player.lastname}
+                      {player.stars != null && player.stars > 0 ? (
+                        <span className="ml-1 inline-flex translate-y-[1px] align-middle items-center">
+                          <span className="relative inline-flex h-4 w-4 items-center justify-center text-[var(--color-primary)]">
+                            <FontAwesomeIcon icon={faStar} className="h-4 w-4" aria-hidden />
+                            <span className="absolute inset-0 flex items-center justify-center text-[8px] font-bold leading-none text-white">
+                              {player.stars}
+                            </span>
+                          </span>
+                        </span>
+                      ) : null}
                     </td>
                     <td className="w-[10%] px-2 py-1.5 tabular-nums text-[var(--color-subtle-text)] sm:px-2.5 text-center">
                       {player.matches_played}

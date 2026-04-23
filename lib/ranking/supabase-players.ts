@@ -5,6 +5,7 @@ export type PlayerDbRow = {
   id: number;
   name: string;
   email: string | null;
+  stars: number | null;
   linkedin: string | null;
   instagram: string | null;
   x_twitter: string | null;
