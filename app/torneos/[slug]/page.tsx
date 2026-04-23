@@ -79,19 +79,18 @@ export default async function TournamentBySlugPage({ params }: PageProps) {
               Jugadores inscritos
             </h2>
             <div className="overflow-x-auto border-2 border-[var(--color-primary)]">
-              <table className="w-full min-w-[460px] border-collapse text-left text-xs">
+              <table className="w-full min-w-[360px] border-collapse text-left text-xs">
                 <thead>
                   <tr className="border-b-2 border-[var(--color-primary)] bg-[var(--color-primary)] text-white">
                     <th className="px-2 py-1.5">#</th>
                     <th className="px-2 py-1.5">Jugador</th>
                     <th className="px-2 py-1.5">ELO</th>
-                    <th className="px-2 py-1.5">Estado</th>
                   </tr>
                 </thead>
                 <tbody>
                   {registeredPlayers.length === 0 ? (
                     <tr className="bg-[var(--color-surface)]">
-                      <td colSpan={4} className="px-2 py-2 text-[var(--color-subtle-text)]">
+                      <td colSpan={3} className="px-2 py-2 text-[var(--color-subtle-text)]">
                         Aun no hay jugadores registrados.
                       </td>
                     </tr>
@@ -112,9 +111,6 @@ export default async function TournamentBySlugPage({ params }: PageProps) {
                             {player ? `${player.name} ${player.lastname}` : `Player #${row.id}`}
                           </td>
                           <td className="px-2 py-1.5 font-mono tabular-nums">{player?.rating ?? "—"}</td>
-                          <td className="px-2 py-1.5 uppercase text-[var(--color-subtle-text)]">
-                            {row.status}
-                          </td>
                         </tr>
                       );
                     })

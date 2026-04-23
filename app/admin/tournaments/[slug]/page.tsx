@@ -1,3 +1,5 @@
+import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -21,18 +23,31 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-const card = "rounded-xl border border-foreground/10 bg-surface shadow-sm";
+const adminCtaClass =
+  "navbar-text btn-gold inline-flex min-h-[48px] w-full max-w-xs items-center justify-center rounded-lg border-2 border-[var(--color-accent-gold)] px-6 py-3 text-xs uppercase shadow-[4px_4px_0_rgba(0,0,0,0.25)] transition active:brightness-95 sm:w-auto sm:max-w-none sm:min-w-[160px]";
+
+const rowLinkClass =
+  "navbar-text btn-gold inline-flex min-h-[44px] items-center justify-center rounded-lg border-2 border-[var(--color-accent-gold)] px-4 py-2.5 text-xs uppercase shadow-[2px_2px_0_rgba(0,0,0,0.2)] transition hover:opacity-95 active:brightness-95 sm:min-w-[7.5rem]";
+
+const cardClass = "rounded-xl border border-foreground/10 bg-surface shadow-sm";
+
+const statusLabelBase =
+  "inline-flex shrink-0 items-center rounded-md border px-2 py-1 text-xs font-semibold uppercase tracking-wide";
 
 function StatusLabel({ status }: { status: "open" | "finished" }) {
   if (status === "open") {
     return (
-      <span className="inline-flex items-center rounded-md bg-emerald-500/15 px-2 py-0.5 text-xs font-medium text-emerald-800 dark:text-emerald-200">
+      <span
+        className={`${statusLabelBase} border-emerald-600/40 bg-emerald-500/10 text-emerald-900 dark:border-emerald-400/45 dark:bg-emerald-400/10 dark:text-emerald-200`}
+      >
         Open
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center rounded-md bg-foreground/10 px-2 py-0.5 text-xs font-medium text-[color:var(--color-subtle-text)]">
+    <span
+      className={`${statusLabelBase} border-foreground/20 bg-muted text-[color:var(--color-subtle-text)]`}
+    >
       Finished
     </span>
   );
@@ -118,14 +133,14 @@ export default async function AdminTournamentDetailPage({ params, searchParams }
   const relations = (joinedRows ?? []) as TournamentPlayerRelation[];
 
   return (
-    <div className="flex w-full min-w-0 flex-col">
+    <div className="min-h-screen bg-background text-foreground">
       <AdminNavbar />
 
-      <div className="mx-auto w-full min-w-0 max-w-4xl px-4 pb-12 pt-6">
-        <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h1 className="logo text-xl text-primary sm:text-2xl">{tournament.name}</h1>
-            <div className="mt-2 flex flex-wrap items-center gap-2">
+      <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-12">
+        <div className="mb-8 flex flex-col items-center gap-6 text-center">
+          <div className="min-w-0 max-w-3xl px-1">
+            <h1 className="logo text-2xl text-primary sm:text-3xl">{tournament.name}</h1>
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
               <span className="text-sm text-[color:var(--color-subtle-text)]">Estado:</span>
               <StatusLabel status={adminStatus} />
               <span className="text-sm text-[color:var(--color-subtle-text)]">
@@ -133,24 +148,21 @@ export default async function AdminTournamentDetailPage({ params, searchParams }
               </span>
             </div>
           </div>
-          <Link
-            href="/admin/tournaments"
-            className="admin-link-btn"
-          >
-            Volver a torneos
-          </Link>
-        </div>
 
-        <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-          <Link href={`/admin/tournaments/${slug}/teams`} className="admin-link-btn">
-            Equipos
-          </Link>
-          <Link href={`/admin/tournaments/${slug}/control`} className="admin-link-btn">
-            Control
-          </Link>
-          <Link href={`/admin/tournaments/${slug}/matches`} className="admin-link-btn">
-            Partidos
-          </Link>
+          <div className="flex w-full max-w-2xl flex-col items-center justify-center gap-3 sm:flex-row sm:flex-wrap">
+            <Link href="/admin/tournaments" className={adminCtaClass}>
+              Volver a torneos
+            </Link>
+            <Link href={`/admin/tournaments/${slug}/teams`} className={rowLinkClass}>
+              Equipos
+            </Link>
+            <Link href={`/admin/tournaments/${slug}/control`} className={rowLinkClass}>
+              Control
+            </Link>
+            <Link href={`/admin/tournaments/${slug}/matches`} className={rowLinkClass}>
+              Partidos
+            </Link>
+          </div>
         </div>
 
         {uiError ? (
@@ -164,14 +176,14 @@ export default async function AdminTournamentDetailPage({ params, searchParams }
           </p>
         ) : null}
 
-        <details className={`${card} group mb-6`}>
+        <details className={`${cardClass} group mb-6`}>
           <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-4 py-3 text-sm font-medium text-foreground transition hover:bg-muted/50 sm:px-5 sm:py-4 [&::-webkit-details-marker]:hidden [&::marker]:content-none">
             <span>Informacion del torneo</span>
             <span
-              className="text-[color:var(--color-subtle-text)] transition-transform group-open:rotate-90"
+              className="inline-flex shrink-0 text-[color:var(--color-subtle-text)] transition-transform duration-200 group-open:rotate-90"
               aria-hidden
             >
-              ▶
+              <FontAwesomeIcon icon={faChevronRight} className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </span>
           </summary>
           <div className="space-y-3 border-t border-foreground/10 px-3 pb-4 pt-3 sm:px-4">
@@ -203,7 +215,7 @@ export default async function AdminTournamentDetailPage({ params, searchParams }
           </div>
         </details>
 
-        <section className={`${card} overflow-visible p-4 sm:p-6`}>
+        <section className={`${cardClass} overflow-visible p-4 sm:p-6`}>
           <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-[color:var(--color-subtle-text)]">
             Jugadores del torneo
           </h2>
@@ -227,19 +239,19 @@ export default async function AdminTournamentDetailPage({ params, searchParams }
               </p>
               <div className="overflow-hidden rounded-lg border border-foreground/10">
                 <div className="max-h-[min(55vh,480px)] overflow-auto">
-                  <table className="w-full border-collapse text-left text-[11px] sm:text-xs">
+                  <table className="w-full border-collapse text-left text-sm">
                     <thead className="sticky top-0 z-[1] border-b border-foreground/10 bg-muted/90 backdrop-blur-sm">
                       <tr>
-                        <th className="w-8 whitespace-nowrap px-1.5 py-1.5 text-center font-semibold tabular-nums text-[color:var(--color-subtle-text)]">
+                        <th className="w-10 whitespace-nowrap px-2 py-2.5 text-center font-semibold tabular-nums text-[color:var(--color-subtle-text)]">
                           #
                         </th>
-                        <th className="px-2 py-1.5 font-semibold uppercase tracking-wide text-[color:var(--color-subtle-text)]">
+                        <th className="px-3 py-2.5 font-semibold text-[color:var(--color-subtle-text)]">
                           Jugador
                         </th>
-                        <th className="whitespace-nowrap px-2 py-1.5 text-right font-semibold uppercase tracking-wide text-[color:var(--color-subtle-text)]">
+                        <th className="whitespace-nowrap px-3 py-2.5 text-right font-semibold text-[color:var(--color-subtle-text)]">
                           Rating
                         </th>
-                        <th className="w-px whitespace-nowrap px-2 py-1.5 text-right font-semibold uppercase text-[color:var(--color-subtle-text)]">
+                        <th className="w-px whitespace-nowrap px-3 py-2.5 text-right font-semibold text-[color:var(--color-subtle-text)]">
                           Acción
                         </th>
                       </tr>
@@ -255,20 +267,20 @@ export default async function AdminTournamentDetailPage({ params, searchParams }
                             key={r.id}
                             className="border-b border-foreground/5 last:border-0 hover:bg-muted/40"
                           >
-                            <td className="px-1.5 py-1 text-center align-middle tabular-nums text-[color:var(--color-subtle-text)]">
+                            <td className="px-2 py-2 text-center align-middle tabular-nums text-[color:var(--color-subtle-text)]">
                               {index + 1}
                             </td>
-                            <td className="max-w-[14rem] truncate px-2 py-1 align-middle font-medium text-foreground" title={label}>
+                            <td className="max-w-[14rem] truncate px-3 py-2 align-middle font-medium text-foreground" title={label}>
                               {label}
                             </td>
-                            <td className="whitespace-nowrap px-2 py-1 text-right align-middle tabular-nums font-medium text-foreground">
+                            <td className="whitespace-nowrap px-3 py-2 text-right align-middle tabular-nums font-medium text-foreground">
                               {player != null && player.rating != null ? player.rating : "—"}
                             </td>
-                            <td className="whitespace-nowrap px-2 py-1 text-right align-middle">
+                            <td className="whitespace-nowrap px-3 py-2 text-right align-middle">
                               <form action={removePlayerFromTournamentAction} className="inline">
                                 <input type="hidden" name="slug" value={slug} />
                                 <input type="hidden" name="playerTournamentId" value={r.id} />
-                                <button type="submit" className="admin-danger-btn py-1 text-[10px] sm:text-xs">
+                                <button type="submit" className="admin-danger-btn text-xs">
                                   Quitar
                                 </button>
                               </form>
@@ -283,7 +295,7 @@ export default async function AdminTournamentDetailPage({ params, searchParams }
             </>
           )}
         </section>
-      </div>
+      </main>
     </div>
   );
 }
