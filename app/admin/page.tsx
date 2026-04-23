@@ -1,41 +1,37 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Press_Start_2P } from "next/font/google";
 import { redirect } from "next/navigation";
 
 import { isAdminSessionValid } from "@/app/admin/actions";
 import { AdminNavbar } from "@/components/admin/AdminNavbar";
 
-const pixel = Press_Start_2P({
-  weight: "400",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
   title: "Panel",
 };
 
-const pixelBtn =
-  "flex min-h-0 min-w-0 flex-1 items-center justify-center rounded-none border-4 border-[var(--color-primary)] px-1 py-5 text-center text-[0.55rem] leading-snug uppercase tracking-wide text-[var(--color-primary)] shadow-[5px_5px_0_var(--color-primary)] transition hover:brightness-[1.03] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[2px_2px_0_var(--color-primary)] sm:gap-1 sm:py-8 sm:text-xs";
+const adminCtaClass =
+  "navbar-text btn-gold inline-flex min-h-[48px] w-full max-w-xs items-center justify-center rounded-lg border-2 border-[var(--color-accent-gold)] px-6 py-3 text-xs uppercase shadow-[4px_4px_0_rgba(0,0,0,0.25)] transition active:brightness-95 sm:w-auto sm:max-w-none sm:min-w-[200px]";
 
 export default async function AdminHomePage() {
   const ok = await isAdminSessionValid();
   if (!ok) redirect("/admin/login");
 
   return (
-    <div className="flex w-full flex-col">
+    <div className="min-h-screen bg-background text-foreground">
       <AdminNavbar />
 
-      <div
-        className={`mx-auto flex w-full max-w-sm flex-row gap-3 px-4 py-8 sm:max-w-md sm:gap-4 ${pixel.className}`}
-      >
-        <Link href="/admin/tournaments" className={`${pixelBtn} bg-[var(--color-accent-gold)]`}>
-          Torneos
-        </Link>
-        <Link href="/admin/players" className={`${pixelBtn} bg-[var(--color-muted)]`}>
-          Jugadores
-        </Link>
-      </div>
+      <main className="mx-auto max-w-6xl px-4 py-10 text-center sm:px-6 sm:py-12">
+        <h1 className="logo mb-2 text-2xl text-primary sm:text-3xl">ADMIN</h1>
+
+        <div className="mx-auto mt-8 flex w-full max-w-xl flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
+          <Link href="/admin/tournaments" className={adminCtaClass}>
+            Torneos
+          </Link>
+          <Link href="/admin/players" className={adminCtaClass}>
+            Jugadores
+          </Link>
+        </div>
+      </main>
     </div>
   );
 }
