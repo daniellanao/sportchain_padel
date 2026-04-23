@@ -5,6 +5,9 @@ export type PlayerDbRow = {
   id: number;
   name: string;
   email: string | null;
+  linkedin: string | null;
+  instagram: string | null;
+  x_twitter: string | null;
   rating: number;
   matches_played: number;
   wins: number;

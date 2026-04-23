@@ -13,12 +13,18 @@ type TournamentRegisteredPlayer = {
         name: string;
         lastname: string;
         rating: number;
+        linkedin: string | null;
+        instagram: string | null;
+        x_twitter: string | null;
       }
     | {
         id: number;
         name: string;
         lastname: string;
         rating: number;
+        linkedin: string | null;
+        instagram: string | null;
+        x_twitter: string | null;
       }[]
     | null;
 };
@@ -68,6 +74,9 @@ export function asPlayer(
       name: string;
       lastname: string;
       rating: number;
+      linkedin: string | null;
+      instagram: string | null;
+      x_twitter: string | null;
     }
   | null {
   if (!value) return null;
@@ -111,7 +120,7 @@ export async function fetchTournamentPageData(slug: string): Promise<TournamentP
     if (supabase) {
       const { data } = await supabase
         .from("player_tournament")
-        .select("id, status, players(id, name, lastname, rating)")
+        .select("id, status, players(id, name, lastname, rating, linkedin, instagram, x_twitter)")
         .eq("tournament_id", tournamentId)
         .order("created_at", { ascending: true });
       registeredPlayers = (data ?? []) as TournamentRegisteredPlayer[];

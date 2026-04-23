@@ -1,6 +1,7 @@
 "use client";
 
 import { faMagnifyingGlass, faPen, faUserPlus, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { faInstagram, faLinkedinIn, faXTwitter } from "@fortawesome/free-brands-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 
@@ -11,9 +12,17 @@ export type AdminPlayerRow = {
   name: string;
   lastname: string;
   email: string | null;
+  linkedin: string | null;
+  instagram: string | null;
+  x_twitter: string | null;
   /** ISO timestamp from `players.created_at` */
   createdAt: string | null;
 };
+
+function normalizeHandle(value: string | null): string | null {
+  const v = (value ?? "").trim();
+  return v || null;
+}
 
 function parseCreatedMs(createdAt: string | null): number {
   if (!createdAt) return Number.NEGATIVE_INFINITY;
@@ -84,7 +93,8 @@ export function AdminPlayersTable({ players }: { players: AdminPlayerRow[] }) {
 
     if (q) {
       const matched = list.filter((p) => {
-        const blob = `${p.name} ${p.lastname} ${p.email ?? ""}`.toLowerCase();
+        const blob =
+          `${p.name} ${p.lastname} ${p.email ?? ""} ${p.linkedin ?? ""} ${p.instagram ?? ""} ${p.x_twitter ?? ""}`.toLowerCase();
         return blob.includes(q);
       });
       matched.sort((a, b) => {
@@ -192,6 +202,9 @@ export function AdminPlayersTable({ players }: { players: AdminPlayerRow[] }) {
                 <th className="min-w-[8rem] px-2 py-2 font-semibold uppercase tracking-wide text-[color:var(--color-subtle-text)]">
                   Email
                 </th>
+                <th className="whitespace-nowrap px-2 py-2 text-center font-semibold uppercase tracking-wide text-[color:var(--color-subtle-text)]">
+                  Redes
+                </th>
                 <th className="w-px whitespace-nowrap px-2 py-2 text-right font-semibold uppercase tracking-wide text-[color:var(--color-subtle-text)]">
                   Editar
                 </th>
@@ -200,7 +213,7 @@ export function AdminPlayersTable({ players }: { players: AdminPlayerRow[] }) {
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-3 py-8 text-center text-[color:var(--color-subtle-text)]">
+                  <td colSpan={5} className="px-3 py-8 text-center text-[color:var(--color-subtle-text)]">
                     {players.length === 0
                       ? "No hay jugadores."
                       : "Ningún jugador coincide con la búsqueda."}
@@ -217,6 +230,48 @@ export function AdminPlayersTable({ players }: { players: AdminPlayerRow[] }) {
                     </td>
                     <td className="max-w-[14rem] truncate px-2 py-1.5 align-middle text-[color:var(--color-subtle-text)]" title={p.email ?? ""}>
                       {p.email ?? "—"}
+                    </td>
+                    <td className="px-2 py-1.5 text-center align-middle">
+                      <div className="inline-flex items-center gap-1.5">
+                        {normalizeHandle(p.linkedin) ? (
+                          <a
+                            href={`https://www.linkedin.com/in/${normalizeHandle(p.linkedin)}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            aria-label={`LinkedIn de ${p.name} ${p.lastname}`}
+                            className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-foreground/15 text-[#0a66c2] transition hover:bg-muted"
+                          >
+                            <FontAwesomeIcon icon={faLinkedinIn} className="h-3.5 w-3.5" aria-hidden />
+                          </a>
+                        ) : null}
+                        {normalizeHandle(p.instagram) ? (
+                          <a
+                            href={`https://www.instagram.com/${normalizeHandle(p.instagram)}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            aria-label={`Instagram de ${p.name} ${p.lastname}`}
+                            className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-foreground/15 text-[#e1306c] transition hover:bg-muted"
+                          >
+                            <FontAwesomeIcon icon={faInstagram} className="h-3.5 w-3.5" aria-hidden />
+                          </a>
+                        ) : null}
+                        {normalizeHandle(p.x_twitter) ? (
+                          <a
+                            href={`https://x.com/${normalizeHandle(p.x_twitter)}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            aria-label={`X de ${p.name} ${p.lastname}`}
+                            className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-foreground/15 text-foreground transition hover:bg-muted"
+                          >
+                            <FontAwesomeIcon icon={faXTwitter} className="h-3.5 w-3.5" aria-hidden />
+                          </a>
+                        ) : null}
+                        {!normalizeHandle(p.linkedin) &&
+                        !normalizeHandle(p.instagram) &&
+                        !normalizeHandle(p.x_twitter) ? (
+                          <span className="text-[color:var(--color-subtle-text)]">—</span>
+                        ) : null}
+                      </div>
                     </td>
                     <td className="px-2 py-1.5 text-right align-middle">
                       <button
@@ -249,6 +304,33 @@ export function AdminPlayersTable({ players }: { players: AdminPlayerRow[] }) {
           <label className={labelClass}>
             Email
             <input name="email" type="email" autoComplete="email" className={inputClass} />
+          </label>
+          <label className={labelClass}>
+            LinkedIn (usuario)
+            <input
+              name="linkedin"
+              placeholder="ej. daniel-lanao"
+              autoComplete="off"
+              className={inputClass}
+            />
+          </label>
+          <label className={labelClass}>
+            Instagram (usuario)
+            <input
+              name="instagram"
+              placeholder="ej. dani.padel"
+              autoComplete="off"
+              className={inputClass}
+            />
+          </label>
+          <label className={labelClass}>
+            X / Twitter (usuario)
+            <input
+              name="x_twitter"
+              placeholder="ej. daniel_lanao"
+              autoComplete="off"
+              className={inputClass}
+            />
           </label>
           <div className="mt-2 flex flex-wrap gap-2">
             <button
@@ -299,6 +381,36 @@ export function AdminPlayersTable({ players }: { players: AdminPlayerRow[] }) {
                 type="email"
                 defaultValue={editing.email ?? ""}
                 autoComplete="email"
+                className={inputClass}
+              />
+            </label>
+            <label className={labelClass}>
+              LinkedIn (usuario)
+              <input
+                name="linkedin"
+                defaultValue={editing.linkedin ?? ""}
+                placeholder="ej. daniel-lanao"
+                autoComplete="off"
+                className={inputClass}
+              />
+            </label>
+            <label className={labelClass}>
+              Instagram (usuario)
+              <input
+                name="instagram"
+                defaultValue={editing.instagram ?? ""}
+                placeholder="ej. dani.padel"
+                autoComplete="off"
+                className={inputClass}
+              />
+            </label>
+            <label className={labelClass}>
+              X / Twitter (usuario)
+              <input
+                name="x_twitter"
+                defaultValue={editing.x_twitter ?? ""}
+                placeholder="ej. daniel_lanao"
+                autoComplete="off"
                 className={inputClass}
               />
             </label>

@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { faInstagram, faLinkedinIn, faXTwitter } from "@fortawesome/free-brands-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -18,6 +20,11 @@ import { fetchTournamentBySlugFromSupabase } from "@/lib/tournaments/supabase-li
 type PageProps = {
   params: Promise<{ slug: string }>;
 };
+
+function normalizeHandle(value: string | null | undefined): string | null {
+  const v = (value ?? "").trim();
+  return v || null;
+}
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
@@ -79,18 +86,19 @@ export default async function TournamentBySlugPage({ params }: PageProps) {
               Jugadores inscritos
             </h2>
             <div className="overflow-x-auto border-2 border-[var(--color-primary)]">
-              <table className="w-full min-w-[360px] border-collapse text-left text-xs">
+              <table className="w-full min-w-[480px] border-collapse text-left text-xs">
                 <thead>
                   <tr className="border-b-2 border-[var(--color-primary)] bg-[var(--color-primary)] text-white">
                     <th className="px-2 py-1.5">#</th>
                     <th className="px-2 py-1.5">Jugador</th>
+                    <th className="px-2 py-1.5 text-center">Redes</th>
                     <th className="px-2 py-1.5">ELO</th>
                   </tr>
                 </thead>
                 <tbody>
                   {registeredPlayers.length === 0 ? (
                     <tr className="bg-[var(--color-surface)]">
-                      <td colSpan={3} className="px-2 py-2 text-[var(--color-subtle-text)]">
+                      <td colSpan={4} className="px-2 py-2 text-[var(--color-subtle-text)]">
                         Aun no hay jugadores registrados.
                       </td>
                     </tr>
@@ -109,6 +117,49 @@ export default async function TournamentBySlugPage({ params }: PageProps) {
                           <td className="px-2 py-1.5 font-mono tabular-nums">{index + 1}</td>
                           <td className="px-2 py-1.5">
                             {player ? `${player.name} ${player.lastname}` : `Player #${row.id}`}
+                          </td>
+                          
+                          <td className="px-2 py-1.5 text-center align-middle">
+                            <div className="inline-flex items-center gap-1.5">
+                              {normalizeHandle(player?.linkedin) ? (
+                                <a
+                                  href={`https://www.linkedin.com/in/${normalizeHandle(player?.linkedin)}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  aria-label={`LinkedIn de ${player ? `${player.name} ${player.lastname}` : "jugador"}`}
+                                  className="inline-flex h-6 w-6 items-center justify-center rounded-md border border-[var(--color-primary)]/25 text-[var(--color-primary)] transition hover:bg-[var(--color-primary)]/8"
+                                >
+                                  <FontAwesomeIcon icon={faLinkedinIn} className="h-3.5 w-3.5" aria-hidden />
+                                </a>
+                              ) : null}
+                              {normalizeHandle(player?.instagram) ? (
+                                <a
+                                  href={`https://www.instagram.com/${normalizeHandle(player?.instagram)}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  aria-label={`Instagram de ${player ? `${player.name} ${player.lastname}` : "jugador"}`}
+                                  className="inline-flex h-6 w-6 items-center justify-center rounded-md border border-[var(--color-primary)]/25 text-[var(--color-primary)] transition hover:bg-[var(--color-primary)]/8"
+                                >
+                                  <FontAwesomeIcon icon={faInstagram} className="h-3.5 w-3.5" aria-hidden />
+                                </a>
+                              ) : null}
+                              {normalizeHandle(player?.x_twitter) ? (
+                                <a
+                                  href={`https://x.com/${normalizeHandle(player?.x_twitter)}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  aria-label={`X de ${player ? `${player.name} ${player.lastname}` : "jugador"}`}
+                                  className="inline-flex h-6 w-6 items-center justify-center rounded-md border border-[var(--color-primary)]/25 text-[var(--color-primary)] transition hover:bg-[var(--color-primary)]/8"
+                                >
+                                  <FontAwesomeIcon icon={faXTwitter} className="h-3.5 w-3.5" aria-hidden />
+                                </a>
+                              ) : null}
+                              {!normalizeHandle(player?.linkedin) &&
+                              !normalizeHandle(player?.instagram) &&
+                              !normalizeHandle(player?.x_twitter) ? (
+                                <span className="text-[var(--color-subtle-text)]">—</span>
+                              ) : null}
+                            </div>
                           </td>
                           <td className="px-2 py-1.5 font-mono tabular-nums">{player?.rating ?? "—"}</td>
                         </tr>
