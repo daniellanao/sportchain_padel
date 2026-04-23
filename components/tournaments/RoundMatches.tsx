@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export type RoundMatchRow = {
   id: number;
+  court: number | null;
   team1Name: string;
   team2Name: string;
   team1Games: number;
@@ -96,9 +97,10 @@ export function RoundMatches({
                   }
                 >
                   <colgroup>
-                    <col className="w-[42%]" />
-                    <col className="w-[16%]" />
-                    <col className="w-[42%]" />
+                    <col className="w-[10%]" />
+                    <col className="w-[38%]" />
+                    <col className="w-[14%]" />
+                    <col className="w-[38%]" />
                   </colgroup>
                   <thead>
                     <tr
@@ -108,6 +110,7 @@ export function RoundMatches({
                           : "border-b-2 border-[var(--color-primary)] bg-[var(--color-primary)] text-white"
                       }
                     >
+                      <th className="px-1 py-1.5 text-center sm:px-2">C</th>
                       <th className="px-1 py-1.5 sm:px-2">Equipo 1</th>
                       <th className="px-1 py-1.5 text-center sm:px-2">G1-G2</th>
                       <th className="px-1 py-1.5 sm:px-2">Equipo 2</th>
@@ -123,6 +126,9 @@ export function RoundMatches({
                             : "border-b border-[var(--color-muted)] bg-[var(--color-surface)]"
                         }
                       >
+                        <td className="px-1 py-1.5 text-center font-mono tabular-nums text-[var(--color-subtle-text)] sm:px-2">
+                          {m.court != null ? `C${m.court}` : "—"}
+                        </td>
                         <td className="truncate px-1 py-1.5 font-medium sm:px-2">
                           <span className="inline-flex items-center gap-0.5">
                             {isTeam1Winner(m) ? (

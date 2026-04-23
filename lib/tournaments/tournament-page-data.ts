@@ -58,6 +58,7 @@ type StandingDbRow = {
 type MatchDbRow = {
   id: number;
   round_number: number;
+  court: number | null;
   team1_id: number | null;
   team2_id: number | null;
   team1_games: number;
@@ -196,7 +197,7 @@ export async function fetchTournamentPageData(slug: string): Promise<TournamentP
       const { data: matchesData } = await supabase
         .from("matches")
         .select(
-          "id, round_number, team1_id, team2_id, team1_games, team2_games, status, finished"
+          "id, round_number, court, team1_id, team2_id, team1_games, team2_games, status, finished"
         )
         .eq("tournament_id", tournamentId)
         .order("round_number", { ascending: true })
@@ -216,6 +217,7 @@ export async function fetchTournamentPageData(slug: string): Promise<TournamentP
         label: `Ronda ${rn}`,
         matches: (matchesByRound.get(rn) ?? []).map((m) => ({
           id: m.id,
+          court: m.court,
           team1Name:
             m.team1_id != null ? teamNameById.get(m.team1_id) ?? `Team #${m.team1_id}` : "—",
           team2Name:

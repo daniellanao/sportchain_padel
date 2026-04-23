@@ -11,6 +11,7 @@ export type ControlTeamOption = {
 
 export type ControlMatchRow = {
   id: number;
+  court: number | null;
   team1Id: number | null;
   team2Id: number | null;
   winnerTeamId: number | null;
@@ -34,6 +35,9 @@ export function MatchesControlTable({
   matches,
   updateAction,
 }: MatchesControlTableProps) {
+  const inputClass =
+    "rounded-lg border border-foreground/20 bg-background px-3 py-2 text-sm text-foreground outline-none ring-primary/40 focus:ring-2";
+
   const [editingId, setEditingId] = useState<number | null>(null);
   const editingMatch = matches.find((m) => m.id === editingId) ?? null;
 
@@ -60,22 +64,36 @@ export function MatchesControlTable({
       {matches.length === 0 ? (
         <p className="text-sm text-[color:var(--color-subtle-text)]">Sin partidos en esta ronda.</p>
       ) : (
-        <div className="overflow-hidden rounded border border-foreground/10">
-          <table className="w-full table-fixed border-collapse text-left text-[11px] sm:text-xs">
+        <div className="overflow-hidden rounded-xl border border-foreground/10 bg-surface shadow-sm">
+          <table className="w-full table-fixed border-collapse text-left text-xs sm:text-sm">
             <colgroup>
-              <col className="w-[32%]" />
-              <col className="w-[11%]" />
-              <col className="w-[11%]" />
-              <col className="w-[32%]" />
+              <col className="w-[8%]" />
+              <col className="w-[29%]" />
+              <col className="w-[10%]" />
+              <col className="w-[10%]" />
+              <col className="w-[29%]" />
               <col className="w-[14%]" />
             </colgroup>
             <thead>
-              <tr className="bg-[var(--color-muted)]">
-                <th className="px-1.5 py-1.5 sm:px-2">Equipo 1</th>
-                <th className="px-2 py-1.5 text-center">G1</th>
-                <th className="px-2 py-1.5 text-center">G2</th>
-                <th className="px-1.5 py-1.5 sm:px-2">Equipo 2</th>
-                <th className="px-2 py-1.5 text-center">Editar</th>
+              <tr className="border-b border-foreground/10 bg-muted/80">
+                <th className="px-2 py-2.5 text-center font-semibold text-[color:var(--color-subtle-text)]">
+                  C
+                </th>
+                <th className="px-2 py-2.5 font-semibold text-[color:var(--color-subtle-text)] sm:px-3">
+                  Equipo 1
+                </th>
+                <th className="px-2 py-2.5 text-center font-semibold text-[color:var(--color-subtle-text)]">
+                  G1
+                </th>
+                <th className="px-2 py-2.5 text-center font-semibold text-[color:var(--color-subtle-text)]">
+                  G2
+                </th>
+                <th className="px-2 py-2.5 font-semibold text-[color:var(--color-subtle-text)] sm:px-3">
+                  Equipo 2
+                </th>
+                <th className="px-2 py-2.5 text-center font-semibold text-[color:var(--color-subtle-text)]">
+                  Editar
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -84,11 +102,14 @@ export function MatchesControlTable({
                   key={m.id}
                   className={
                     i % 2 === 0
-                      ? "border-t border-foreground/10 bg-[var(--color-surface)]"
-                      : "border-t border-foreground/10 bg-[var(--color-muted)]/30"
+                      ? "border-t border-foreground/10 bg-background/70"
+                      : "border-t border-foreground/10 bg-muted/25"
                   }
                 >
-                  <td className="truncate px-1.5 py-1.5 sm:px-2">
+                  <td className="px-2 py-2 text-center align-middle font-mono tabular-nums text-[color:var(--color-subtle-text)]">
+                    {m.court != null ? `C${m.court}` : "—"}
+                  </td>
+                  <td className="truncate px-2 py-2 align-middle sm:px-3">
                     <span className="inline-flex items-center gap-1">
                       {isWinner(m, m.team1Id) ? (
                         <FontAwesomeIcon
@@ -106,9 +127,13 @@ export function MatchesControlTable({
                       <span>{getTeamName(m.team1Id)}</span>
                     </span>
                   </td>
-                  <td className="px-2 py-1.5 text-center font-mono tabular-nums">{m.team1Games}</td>
-                  <td className="px-2 py-1.5 text-center font-mono tabular-nums">{m.team2Games}</td>
-                  <td className="truncate px-1.5 py-1.5 sm:px-2">
+                  <td className="px-2 py-2 text-center align-middle font-mono tabular-nums">
+                    {m.team1Games}
+                  </td>
+                  <td className="px-2 py-2 text-center align-middle font-mono tabular-nums">
+                    {m.team2Games}
+                  </td>
+                  <td className="truncate px-2 py-2 align-middle sm:px-3">
                     <span className="inline-flex items-center gap-1">
                       {isWinner(m, m.team2Id) ? (
                         <FontAwesomeIcon
@@ -126,11 +151,11 @@ export function MatchesControlTable({
                       <span>{getTeamName(m.team2Id)}</span>
                     </span>
                   </td>
-                  <td className="px-2 py-1.5 text-center">
+                  <td className="px-2 py-2 text-center align-middle">
                     <button
                       type="button"
                       onClick={() => setEditingId(m.id)}
-                      className="inline-flex h-8 w-8 items-center justify-center border-2 border-[var(--color-primary)] bg-[var(--color-muted)] text-[var(--color-primary)] shadow-[2px_2px_0_rgba(0,0,0,0.2)] transition hover:-translate-y-0.5"
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-foreground/20 bg-background text-primary transition hover:bg-muted"
                       aria-label="Editar partido"
                       title="Editar partido"
                     >
@@ -145,21 +170,25 @@ export function MatchesControlTable({
       )}
 
       {editingMatch ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="w-full max-w-md border-4 border-[var(--color-primary)] bg-[var(--color-surface)] p-4 shadow-[8px_8px_0_rgba(0,0,0,0.3)]">
-            <h3 className="navbar-text mb-3 text-xs uppercase text-[var(--color-primary)]">
-              Editar partido
-            </h3>
+        <div className="fixed inset-0 z-50 flex items-end justify-center p-4 sm:items-center">
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/50"
+            aria-label="Cerrar"
+            onClick={() => setEditingId(null)}
+          />
+          <div className="relative z-10 w-full max-w-md rounded-xl border border-foreground/15 bg-surface p-5 shadow-xl">
+            <h3 className="mb-4 text-base font-semibold text-primary">Editar partido</h3>
             <form action={updateAction} className="grid gap-3">
               <input type="hidden" name="slug" value={slug} />
               <input type="hidden" name="matchId" value={editingMatch.id} />
 
-              <label className="flex flex-col gap-1 text-xs">
+              <label className="flex flex-col gap-1 text-xs font-medium text-[color:var(--color-subtle-text)]">
                 Equipo 1
                 <select
                   name="team1Id"
                   defaultValue={editingMatch.team1Id ?? ""}
-                  className="rounded border border-foreground/20 bg-background px-2 py-2 text-sm"
+                  className={inputClass}
                 >
                   <option value="">Seleccionar equipo</option>
                   {teams.map((t) => (
@@ -170,12 +199,12 @@ export function MatchesControlTable({
                 </select>
               </label>
 
-              <label className="flex flex-col gap-1 text-xs">
+              <label className="flex flex-col gap-1 text-xs font-medium text-[color:var(--color-subtle-text)]">
                 Equipo 2
                 <select
                   name="team2Id"
                   defaultValue={editingMatch.team2Id ?? ""}
-                  className="rounded border border-foreground/20 bg-background px-2 py-2 text-sm"
+                  className={inputClass}
                 >
                   <option value="">Seleccionar equipo</option>
                   {teams.map((t) => (
@@ -187,7 +216,7 @@ export function MatchesControlTable({
               </label>
 
               <div className="grid grid-cols-2 gap-2">
-                <label className="flex flex-col gap-1 text-xs">
+                <label className="flex flex-col gap-1 text-xs font-medium text-[color:var(--color-subtle-text)]">
                   G1 (0-6)
                   <input
                     name="team1Games"
@@ -195,10 +224,10 @@ export function MatchesControlTable({
                     min={0}
                     max={6}
                     defaultValue={editingMatch.team1Games}
-                    className="rounded border border-foreground/20 bg-background px-2 py-2 text-sm"
+                    className={inputClass}
                   />
                 </label>
-                <label className="flex flex-col gap-1 text-xs">
+                <label className="flex flex-col gap-1 text-xs font-medium text-[color:var(--color-subtle-text)]">
                   G2 (0-6)
                   <input
                     name="team2Games"
@@ -206,17 +235,17 @@ export function MatchesControlTable({
                     min={0}
                     max={6}
                     defaultValue={editingMatch.team2Games}
-                    className="rounded border border-foreground/20 bg-background px-2 py-2 text-sm"
+                    className={inputClass}
                   />
                 </label>
               </div>
 
-              <label className="flex flex-col gap-1 text-xs">
+              <label className="flex flex-col gap-1 text-xs font-medium text-[color:var(--color-subtle-text)]">
                 Winner
                 <select
                   name="winnerTeamId"
                   defaultValue={editingMatch.winnerTeamId ?? ""}
-                  className="rounded border border-foreground/20 bg-background px-2 py-2 text-sm"
+                  className={inputClass}
                 >
                   <option value="">Sin ganador</option>
                   {editingMatch.team1Id != null ? (
@@ -228,22 +257,22 @@ export function MatchesControlTable({
                 </select>
               </label>
 
-              <label className="inline-flex items-center gap-2 text-xs">
+              <label className="inline-flex items-center gap-2 text-xs font-medium text-[color:var(--color-subtle-text)]">
                 <input type="checkbox" name="finished" defaultChecked={editingMatch.finished} />
                 Finished
               </label>
 
-              <div className="mt-1 flex justify-end gap-2">
+              <div className="mt-2 flex flex-wrap justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setEditingId(null)}
-                  className="rounded border border-foreground/20 bg-background px-3 py-2 text-xs"
+                  className="rounded-lg border border-foreground/20 bg-background px-4 py-2.5 text-sm font-medium text-foreground transition hover:bg-muted"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="rounded border border-[var(--color-primary)] bg-[var(--color-primary)] px-3 py-2 text-xs text-white"
+                  className="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
                 >
                   Guardar
                 </button>

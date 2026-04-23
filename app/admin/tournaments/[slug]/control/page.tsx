@@ -1,3 +1,5 @@
+import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -17,6 +19,12 @@ export const metadata: Metadata = {
   title: "Control torneo",
   robots: { index: false, follow: false },
 };
+
+const adminCtaClass =
+  "navbar-text btn-gold inline-flex min-h-[48px] w-full max-w-xs items-center justify-center rounded-lg border-2 border-[var(--color-accent-gold)] px-6 py-3 text-xs uppercase shadow-[4px_4px_0_rgba(0,0,0,0.25)] transition active:brightness-95 sm:w-auto sm:max-w-none sm:min-w-[160px]";
+
+const rowLinkClass =
+  "navbar-text btn-gold inline-flex min-h-[44px] items-center justify-center rounded-lg border-2 border-[var(--color-accent-gold)] px-4 py-2.5 text-xs uppercase shadow-[2px_2px_0_rgba(0,0,0,0.2)] transition hover:opacity-95 active:brightness-95 sm:min-w-[7.5rem]";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -45,6 +53,7 @@ type StandingDbRow = {
 type MatchDbRow = {
   id: number;
   round_number: number;
+  court: number | null;
   team1_id: number | null;
   team2_id: number | null;
   winner_team_id: number | null;
@@ -128,7 +137,7 @@ export default async function AdminTournamentControlPage({ params, searchParams 
 
   const { data: matchesData } = await supabase
     .from("matches")
-    .select("id, round_number, team1_id, team2_id, winner_team_id, team1_games, team2_games, status, finished")
+    .select("id, round_number, court, team1_id, team2_id, winner_team_id, team1_games, team2_games, status, finished")
     .eq("tournament_id", tournamentId)
     .order("round_number", { ascending: true })
     .order("id", { ascending: true });
@@ -147,30 +156,31 @@ export default async function AdminTournamentControlPage({ params, searchParams 
   }));
 
   return (
-    <div className="flex w-full min-w-0 flex-col">
+    <div className="min-h-screen bg-background text-foreground">
       <AdminNavbar />
 
-      <div className="mx-auto w-full min-w-0 max-w-6xl px-4 pb-12 pt-4">
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-          <h1 className="logo text-xl text-primary">{tournamentName}</h1>
+      <main className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-12">
+        <div className="mb-8 flex flex-col items-center gap-6 text-center">
+          <h1 className="logo text-2xl text-primary sm:text-3xl">{tournamentName} 
+            
+            </h1>
           
-          <div className="flex flex-wrap gap-2 sm:gap-3">
-            <Link
-              href={`/admin/tournaments/${slug}`}
-              className="inline-flex items-center justify-center rounded-lg border border-foreground/20 bg-background px-4 py-2.5 text-sm font-medium text-primary transition hover:bg-muted"
-            >
-              Regresar al Detalle
-            </Link>
-          </div>
+        </div>
+
+        <div className="mb-6 flex justify-center sm:justify-start">
+          <Link href={`/admin/tournaments/${slug}`} className={rowLinkClass}>
+            <FontAwesomeIcon icon={faArrowLeft} className="mr-2 h-3.5 w-3.5" aria-hidden />
+            Regresar
+          </Link>
         </div>
 
         {uiError ? (
-          <p className="mb-4 rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+          <p className="mb-4 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-800 dark:text-red-200">
             {uiError}
           </p>
         ) : null}
         {success ? (
-          <p className="mb-4 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200">
+          <p className="mb-4 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-800 dark:text-emerald-200">
             {success}
           </p>
         ) : null}
@@ -182,6 +192,7 @@ export default async function AdminTournamentControlPage({ params, searchParams 
             (m) =>
               ({
                 id: m.id,
+                court: m.court,
                 team1Id: m.team1_id,
                 team2Id: m.team2_id,
                 winnerTeamId: m.winner_team_id,
@@ -201,7 +212,7 @@ export default async function AdminTournamentControlPage({ params, searchParams 
             />
           );
         })}
-      </div>
+      </main>
     </div>
   );
 }

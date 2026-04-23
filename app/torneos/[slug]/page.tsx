@@ -8,10 +8,7 @@ import { Navbar } from "@/components/Navbar";
 import { RoundMatches } from "@/components/tournaments/RoundMatches";
 import { StandingsTable } from "@/components/tournaments/StandingsTable";
 
-import {
-  ALEPH_MATCHES_BY_ROUND,
-  ALEPH_TOURNAMENT_SLUG,
-} from "@/data/tournaments/aleph_padel_tournament";
+
 import { formatTournamentFormatLabel } from "@/data/tournaments";
 import { absoluteUrl } from "@/lib/site-config";
 import { fetchTournamentPageData, asPlayer } from "@/lib/tournaments/tournament-page-data";
@@ -59,8 +56,7 @@ export default async function TournamentBySlugPage({ params }: PageProps) {
   const { tournament, registeredPlayers, teams, playersById, standingsRows, roundMatchesRounds } =
     loaded.data;
 
-  const showAlephDetail = slug === ALEPH_TOURNAMENT_SLUG;
-
+  
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
@@ -223,56 +219,7 @@ export default async function TournamentBySlugPage({ params }: PageProps) {
           </div>
         </section>
 
-        {showAlephDetail ? (
-          <>
-            <section>
-              <h2 className="navbar-text mb-4 text-xs uppercase tracking-[0.12em] text-[var(--color-primary)]">
-                Matches
-              </h2>
-              <div className="flex flex-col gap-8">
-                {ALEPH_MATCHES_BY_ROUND.map((round) => (
-                  <div key={round.round}>
-                    <h3 className="mb-3 border-b-2 border-[var(--color-accent-gold)] pb-2 text-lg font-black uppercase text-[var(--color-primary)]">
-                      {round.label}
-                    </h3>
-                    <ul className="flex flex-col gap-4">
-                      {round.matches.map((m, idx) => (
-                        <li
-                          key={`${round.round}-${idx}`}
-                          className="border-2 border-[var(--color-primary)] bg-[var(--color-muted)]/40 p-4 shadow-[4px_4px_0_rgba(0,0,0,0.12)]"
-                        >
-                          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-                            <div className="min-w-0 flex-1">
-                              <p className="font-bold text-[var(--color-primary)]">{m.team1.name}</p>
-                              <p className="text-xs text-[var(--color-subtle-text)]">
-                                {m.team1.players}
-                              </p>
-                            </div>
-                            <div className="navbar-text flex shrink-0 items-center gap-1 text-xl tabular-nums text-[var(--color-primary)]">
-                              <span>{m.score1}</span>
-                              <span className="text-[var(--color-subtle-text)]">:</span>
-                              <span>{m.score2}</span>
-                            </div>
-                            <div className="min-w-0 flex-1 text-right sm:text-right">
-                              <p className="font-bold text-[var(--color-primary)]">{m.team2.name}</p>
-                              <p className="text-xs text-[var(--color-subtle-text)]">
-                                {m.team2.players}
-                              </p>
-                            </div>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            </section>
-          </>
-        ) : (
-          <p className="text-sm text-[var(--color-subtle-text)]">
-            Bracket and standings for this tournament will be published here.
-          </p>
-        )}
+       
       </main>
     </div>
   );

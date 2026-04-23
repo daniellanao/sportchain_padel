@@ -35,10 +35,13 @@ export async function updateMatchControlAction(formData: FormData): Promise<void
   const winnerTeamId = toOptionalInt(formData.get("winnerTeamId"));
   const finished = String(formData.get("finished") ?? "") === "on";
 
-  if (!slug || !matchId || !team1Id || !team2Id || team1Games == null || team2Games == null) {
+  if (!slug || !matchId || team1Games == null || team2Games == null) {
     redirect("/admin/tournaments");
   }
-  if (team1Id === team2Id) {
+  if (team1Id == null && team2Id == null) {
+    redirect(`${controlPath(slug)}?error=Debes+seleccionar+al+menos+un+equipo`);
+  }
+  if (team1Id != null && team2Id != null && team1Id === team2Id) {
     redirect(`${controlPath(slug)}?error=Equipo+1+y+Equipo+2+no+pueden+ser+iguales`);
   }
   if (team1Games < 0 || team1Games > 6 || team2Games < 0 || team2Games > 6) {
