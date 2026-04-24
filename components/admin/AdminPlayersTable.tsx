@@ -12,6 +12,8 @@ export type AdminPlayerRow = {
   name: string;
   lastname: string;
   email: string | null;
+  /** Integer stars from `players.stars` (nullable in DB) */
+  stars: number | null;
   linkedin: string | null;
   instagram: string | null;
   x_twitter: string | null;
@@ -94,7 +96,7 @@ export function AdminPlayersTable({ players }: { players: AdminPlayerRow[] }) {
     if (q) {
       const matched = list.filter((p) => {
         const blob =
-          `${p.name} ${p.lastname} ${p.email ?? ""} ${p.linkedin ?? ""} ${p.instagram ?? ""} ${p.x_twitter ?? ""}`.toLowerCase();
+          `${p.name} ${p.lastname} ${p.email ?? ""} ${p.stars ?? ""} ${p.linkedin ?? ""} ${p.instagram ?? ""} ${p.x_twitter ?? ""}`.toLowerCase();
         return blob.includes(q);
       });
       matched.sort((a, b) => {
@@ -203,6 +205,9 @@ export function AdminPlayersTable({ players }: { players: AdminPlayerRow[] }) {
                   Email
                 </th>
                 <th className="whitespace-nowrap px-2 py-2 text-center font-semibold uppercase tracking-wide text-[color:var(--color-subtle-text)]">
+                  Estrellas
+                </th>
+                <th className="whitespace-nowrap px-2 py-2 text-center font-semibold uppercase tracking-wide text-[color:var(--color-subtle-text)]">
                   Redes
                 </th>
                 <th className="w-px whitespace-nowrap px-2 py-2 text-right font-semibold uppercase tracking-wide text-[color:var(--color-subtle-text)]">
@@ -213,7 +218,7 @@ export function AdminPlayersTable({ players }: { players: AdminPlayerRow[] }) {
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-3 py-8 text-center text-[color:var(--color-subtle-text)]">
+                  <td colSpan={6} className="px-3 py-8 text-center text-[color:var(--color-subtle-text)]">
                     {players.length === 0
                       ? "No hay jugadores."
                       : "Ningún jugador coincide con la búsqueda."}
@@ -230,6 +235,9 @@ export function AdminPlayersTable({ players }: { players: AdminPlayerRow[] }) {
                     </td>
                     <td className="max-w-[14rem] truncate px-2 py-1.5 align-middle text-[color:var(--color-subtle-text)]" title={p.email ?? ""}>
                       {p.email ?? "—"}
+                    </td>
+                    <td className="px-2 py-1.5 text-center align-middle tabular-nums text-foreground">
+                      {p.stars != null ? p.stars : "—"}
                     </td>
                     <td className="px-2 py-1.5 text-center align-middle">
                       <div className="inline-flex items-center gap-1.5">
@@ -304,6 +312,19 @@ export function AdminPlayersTable({ players }: { players: AdminPlayerRow[] }) {
           <label className={labelClass}>
             Email
             <input name="email" type="email" autoComplete="email" className={inputClass} />
+          </label>
+          <label className={labelClass}>
+            Estrellas
+            <input
+              name="stars"
+              type="number"
+              min={0}
+              step={1}
+              inputMode="numeric"
+              placeholder="Vacío = sin valor"
+              autoComplete="off"
+              className={inputClass}
+            />
           </label>
           <label className={labelClass}>
             LinkedIn (usuario)
@@ -381,6 +402,20 @@ export function AdminPlayersTable({ players }: { players: AdminPlayerRow[] }) {
                 type="email"
                 defaultValue={editing.email ?? ""}
                 autoComplete="email"
+                className={inputClass}
+              />
+            </label>
+            <label className={labelClass}>
+              Estrellas
+              <input
+                name="stars"
+                type="number"
+                min={0}
+                step={1}
+                inputMode="numeric"
+                placeholder="Vacío = sin valor"
+                defaultValue={editing.stars ?? ""}
+                autoComplete="off"
                 className={inputClass}
               />
             </label>

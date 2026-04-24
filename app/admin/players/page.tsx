@@ -32,6 +32,7 @@ export default async function AdminPlayersPage({ searchParams }: PageProps) {
     name: p.name,
     lastname: p.lastname,
     email: p.email,
+    stars: p.stars,
     linkedin: p.linkedin,
     instagram: p.instagram,
     x_twitter: p.x_twitter,
