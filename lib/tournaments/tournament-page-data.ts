@@ -13,6 +13,7 @@ type TournamentRegisteredPlayer = {
         name: string;
         lastname: string;
         rating: number;
+        stars: number | null;
         linkedin: string | null;
         instagram: string | null;
         x_twitter: string | null;
@@ -22,6 +23,7 @@ type TournamentRegisteredPlayer = {
         name: string;
         lastname: string;
         rating: number;
+        stars: number | null;
         linkedin: string | null;
         instagram: string | null;
         x_twitter: string | null;
@@ -40,6 +42,7 @@ type BasicPlayer = {
   id: number;
   name: string;
   lastname: string;
+  stars: number | null;
 };
 
 type StandingDbRow = {
@@ -75,6 +78,7 @@ export function asPlayer(
       name: string;
       lastname: string;
       rating: number;
+      stars: number | null;
       linkedin: string | null;
       instagram: string | null;
       x_twitter: string | null;
@@ -121,7 +125,7 @@ export async function fetchTournamentPageData(slug: string): Promise<TournamentP
     if (supabase) {
       const { data } = await supabase
         .from("player_tournament")
-        .select("id, status, players(id, name, lastname, rating, linkedin, instagram, x_twitter)")
+        .select("id, status, players(id, name, lastname, rating, stars, linkedin, instagram, x_twitter)")
         .eq("tournament_id", tournamentId)
         .order("created_at", { ascending: true });
       registeredPlayers = (data ?? []) as TournamentRegisteredPlayer[];
@@ -152,7 +156,7 @@ export async function fetchTournamentPageData(slug: string): Promise<TournamentP
       if (playerIds.length > 0) {
         const { data: playersData } = await supabase
           .from("players")
-          .select("id, name, lastname")
+          .select("id, name, lastname, stars")
           .in("id", playerIds);
         const players = (playersData ?? []) as BasicPlayer[];
         playersById = new Map(players.map((p) => [p.id, p]));

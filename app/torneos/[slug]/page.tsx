@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { faStar } from "@fortawesome/free-solid-svg-icons";
 import { faInstagram, faLinkedinIn, faXTwitter } from "@fortawesome/free-brands-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
@@ -21,6 +22,32 @@ type PageProps = {
 function normalizeHandle(value: string | null | undefined): string | null {
   const v = (value ?? "").trim();
   return v || null;
+}
+
+function PlayerNameWithStarsBadge({
+  name,
+  lastname,
+  stars,
+}: {
+  name: string;
+  lastname: string;
+  stars: number | null;
+}) {
+  return (
+    <span>
+      {name} {lastname}
+      {stars != null && stars > 0 ? (
+        <span className="ml-1.5 inline-flex translate-y-[1px] items-center align-middle">
+          <span className="relative inline-flex h-4 w-4 items-center justify-center text-[var(--color-primary)]">
+            <FontAwesomeIcon icon={faStar} className="h-4 w-4" aria-hidden />
+            <span className="absolute inset-0 flex items-center justify-center text-[8px] font-bold leading-none text-white">
+              {stars}
+            </span>
+          </span>
+        </span>
+      ) : null}
+    </span>
+  );
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -112,7 +139,15 @@ export default async function TournamentBySlugPage({ params }: PageProps) {
                         >
                           <td className="px-2 py-1.5 font-mono tabular-nums">{index + 1}</td>
                           <td className="px-2 py-1.5">
-                            {player ? `${player.name} ${player.lastname}` : `Player #${row.id}`}
+                            {player ? (
+                              <PlayerNameWithStarsBadge
+                                name={player.name}
+                                lastname={player.lastname}
+                                stars={player.stars}
+                              />
+                            ) : (
+                              `Player #${row.id}`
+                            )}
                           </td>
                           
                           <td className="px-2 py-1.5 text-center align-middle">
@@ -203,10 +238,26 @@ export default async function TournamentBySlugPage({ params }: PageProps) {
                         >
                           <td className="px-2 py-1.5 font-mono tabular-nums">{index + 1}</td>
                           <td className="px-2 py-1.5">
-                            {p1 ? `${p1.name} ${p1.lastname}` : `Player #${team.player1_id}`}
+                            {p1 ? (
+                              <PlayerNameWithStarsBadge
+                                name={p1.name}
+                                lastname={p1.lastname}
+                                stars={p1.stars}
+                              />
+                            ) : (
+                              `Player #${team.player1_id}`
+                            )}
                           </td>
                           <td className="px-2 py-1.5">
-                            {p2 ? `${p2.name} ${p2.lastname}` : `Player #${team.player2_id}`}
+                            {p2 ? (
+                              <PlayerNameWithStarsBadge
+                                name={p2.name}
+                                lastname={p2.lastname}
+                                stars={p2.stars}
+                              />
+                            ) : (
+                              `Player #${team.player2_id}`
+                            )}
                           </td>
                           <td className="px-2 py-1.5">{team.team_name?.trim() || "—"}</td>
                         </tr>
