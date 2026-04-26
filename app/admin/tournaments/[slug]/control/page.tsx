@@ -135,6 +135,16 @@ export default async function AdminTournamentControlPage({ params, searchParams 
     .sort((a, b) => b.points - a.points || b.buchholz - a.buchholz || b.gamesDifference - a.gamesDifference)
     .map((row, idx) => ({ ...row, rank: idx + 1 } satisfies StandingsTableRow));
 
+  const standingRankByTeamId = new Map<number, number>(
+    ((standingsData ?? []) as StandingDbRow[])
+      .slice()
+      .sort(
+        (a, b) =>
+          b.points - a.points || b.buchholz - a.buchholz || b.games_difference - a.games_difference
+      )
+      .map((row, idx) => [row.team_id, idx + 1])
+  );
+
   const { data: matchesData } = await supabase
     .from("matches")
     .select("id, round_number, court, team1_id, team2_id, winner_team_id, team1_games, team2_games, status, finished")
@@ -150,10 +160,20 @@ export default async function AdminTournamentControlPage({ params, searchParams 
   }
   const roundNumbers = [...matchesByRound.keys()].sort((a, b) => a - b);
 
-  const teamOptions: ControlTeamOption[] = teams.map((t) => ({
-    id: t.id,
-    name: teamNameById.get(t.id) ?? `Team #${t.id}`,
-  }));
+  const teamOptions: ControlTeamOption[] = teams
+    .map((t) => {
+      const name = teamNameById.get(t.id) ?? `Team #${t.id}`;
+      return {
+        id: t.id,
+        name,
+        standingRank: standingRankByTeamId.get(t.id) ?? null,
+      };
+    })
+    .sort((a, b) => {
+      const rankA = a.standingRank ?? Number.MAX_SAFE_INTEGER;
+      const rankB = b.standingRank ?? Number.MAX_SAFE_INTEGER;
+      return rankA - rankB || a.name.localeCompare(b.name);
+    });
 
   return (
     <div className="min-h-screen bg-background text-foreground">
