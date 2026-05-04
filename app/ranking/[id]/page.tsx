@@ -248,18 +248,9 @@ export default async function PlayerHistoryPage({ params }: PageProps) {
         </Link>
 
         <header className="mb-8 border-4 border-[var(--color-accent-gold)] bg-[var(--color-surface)] p-5 shadow-[6px_6px_0_rgba(0,0,0,0.15)] sm:p-6">
-          <p className="navbar-text mb-1 text-xs uppercase tracking-[0.15em] text-[var(--color-primary)]">
-            Jugador #{row.id}
-          </p>
           <h1 className="text-2xl font-black uppercase text-[var(--color-primary)] sm:text-3xl">
             {name}
           </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-[var(--color-subtle-text)]">
-            <strong className="text-[var(--color-foreground)]">El pádel se juega en parejas:</strong>{" "}
-            cada fila muestra <strong>tu compañero</strong> y <strong>los dos rivales</strong>.
-            <strong className="text-[var(--color-foreground)]"> El ELO es individual</strong>: el
-            cambio de puntos se calcula para ti, no para la pareja como bloque.
-          </p>
           <dl className="mt-4 flex flex-wrap gap-6 text-sm">
             <div>
               <dt className="navbar-text text-[10px] uppercase text-[var(--color-subtle-text)]">

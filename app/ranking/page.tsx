@@ -50,8 +50,14 @@ export default async function RankingPage() {
         <h1 className="text-2xl font-black uppercase text-[var(--color-primary)] sm:text-3xl">
           Ranking
         </h1>
-
-        
+        <p className="mt-2 text-sm text-[color:var(--color-subtle-text)]">
+          <Link
+            href="/ranking/calculo"
+            className="font-medium text-[var(--color-primary)] underline-offset-2 hover:underline"
+          >
+            ¿Cómo se calcula?
+          </Link>
+        </p>
 
         {!result.ok ? (
           <p className="mt-4 rounded border-2 border-amber-600/60 bg-amber-950/20 px-4 py-3 text-sm text-amber-100">
