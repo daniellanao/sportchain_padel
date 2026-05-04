@@ -1,51 +1,47 @@
 import Link from "next/link";
 
-/** Served from `public/sportchain_padel_ranking_bg.png` → `/sportchain_padel_ranking_bg.png` */
 const HERO_BACKGROUND_URL = "/sportchain_padel_background.png";
 
-const heroPanelClass =
-  "border-4 border-[var(--color-accent-gold)] bg-[rgba(11,31,59,0.92)] shadow-[8px_8px_0_rgba(0,0,0,0.35)]";
-
 /**
- * Hero: full-viewport intro with pixel-art background.
- * Contrast: darker overlay + opaque navy panel; body copy uses near-white on dark (not --color-subtle-text, which is for light surfaces).
+ * Hero: full-viewport intro with background image.
+ * Glass panel, tight typography, soft overlay for contrast.
  */
 export function Hero() {
   return (
     <section
       id="home"
-      className="relative flex min-h-[calc(100vh-84px)] flex-col items-center justify-center px-5 py-16 sm:py-20"
+      className="relative flex min-h-[calc(100vh-84px)] flex-col items-center justify-center px-5 py-16 sm:py-24"
       style={{
-        backgroundImage: `linear-gradient(rgba(11, 31, 59, 0.62), rgba(11, 31, 59, 0.74)), url('${HERO_BACKGROUND_URL}')`,
+        backgroundImage: `linear-gradient(165deg, rgba(11, 31, 59, 0.78) 0%, rgba(11, 31, 59, 0.55) 45%, rgba(11, 31, 59, 0.72) 100%), url('${HERO_BACKGROUND_URL}')`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         imageRendering: "pixelated",
       }}
     >
-      <div className="flex w-full max-w-3xl flex-col items-stretch">
-        <div className={`w-full p-6 text-center sm:p-10 ${heroPanelClass}`}>
-          <h1 className="mb-5 text-3xl font-black uppercase leading-tight text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.45)] sm:text-5xl">
-            Padel - Sportchain
-          </h1>
-
-          <h2 className="mb-4 text-xl font-bold uppercase leading-tight text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.45)] sm:text-2xl">
-            Ranking y torneos
-          </h2>
-     
-          <p className="mx-auto max-w-2xl text-sm leading-relaxed text-[rgba(232,236,245,0.92)] sm:text-base">
-            Portal para ver el ranking general de jugadores de pádel, resultados y busqueda de torneos para seguir sumando puntos.
+      <div className="relative w-full max-w-2xl">
+        <div className="rounded-2xl border border-white/10 bg-[rgba(11,31,59,0.45)] p-8 shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur-md sm:p-12">
+          <p className="mb-3 text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--color-accent-gold)] sm:text-xs">
+            Sportchain
           </p>
 
-          <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center sm:gap-4">
+          <h1 className="mb-4 text-center text-3xl font-bold leading-[1.15] tracking-tight text-white sm:text-4xl sm:leading-tight md:text-5xl">
+            Pádel: ranking y torneos
+          </h1>
+
+          <p className="mx-auto max-w-lg text-center text-[15px] leading-relaxed text-white/80 sm:text-base">
+            Consulta el ranking general, resultados y torneos para seguir sumando puntos.
+          </p>
+
+          <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:justify-center sm:gap-4">
             <Link
               href="/ranking"
-              className="navbar-text btn-gold inline-flex min-h-[48px] flex-1 items-center justify-center border-2 border-[var(--color-accent-gold)] px-6 py-3 text-xs uppercase shadow-[4px_4px_0_rgba(0,0,0,0.3)] sm:flex-initial sm:min-w-[200px]"
+              className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[var(--color-accent-gold)] px-8 text-sm font-semibold text-[var(--color-primary)] shadow-sm transition hover:brightness-105 active:scale-[0.98] sm:min-w-[11rem]"
             >
               Ver ranking
             </Link>
             <Link
               href="/torneos"
-              className="navbar-text btn-gold inline-flex min-h-[48px] flex-1 items-center justify-center border-2 border-[var(--color-accent-gold)] px-6 py-3 text-xs uppercase shadow-[4px_4px_0_rgba(0,0,0,0.3)] sm:flex-initial sm:min-w-[200px]"
+              className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/25 bg-white/5 px-8 text-sm font-semibold text-white backdrop-blur-sm transition hover:border-white/40 hover:bg-white/10 active:scale-[0.98] sm:min-w-[11rem]"
             >
               Ver torneos
             </Link>
