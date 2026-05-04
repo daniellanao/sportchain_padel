@@ -1,4 +1,9 @@
-import { faRightFromBracket, faTrophy, faUsers } from "@fortawesome/free-solid-svg-icons";
+import {
+  faHandshake,
+  faRightFromBracket,
+  faTrophy,
+  faUsers,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 
@@ -16,6 +21,10 @@ export function AdminNavbar() {
       <Link href="/admin/tournaments" className={`${itemClass} border-r border-white/15`}>
         <FontAwesomeIcon icon={faTrophy} className="h-3 w-3 shrink-0 sm:h-3.5 sm:w-3.5" aria-hidden />
         <span className="truncate">Torneos</span>
+      </Link>
+      <Link href="/admin/matches" className={`${itemClass} border-r border-white/15`}>
+        <FontAwesomeIcon icon={faHandshake} className="h-3 w-3 shrink-0 sm:h-3.5 sm:w-3.5" aria-hidden />
+        <span className="truncate">Partidos</span>
       </Link>
       <Link href="/admin/players" className={`${itemClass} border-r border-white/15`}>
         <FontAwesomeIcon icon={faUsers} className="h-3 w-3 shrink-0 sm:h-3.5 sm:w-3.5" aria-hidden />

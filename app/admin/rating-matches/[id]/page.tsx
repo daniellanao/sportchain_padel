@@ -7,6 +7,7 @@ import {
   processRatingMatchEloAction,
   updateRatingMatchPlayersAction,
 } from "@/app/admin/rating-matches/[id]/actions";
+import { AdminNavbar } from "@/components/admin/AdminNavbar";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -132,7 +133,11 @@ export default async function AdminRatingMatchDetailPage({ params, searchParams 
   const winningSideDefault = winnerRow != null && Number(winnerRow.side) === 2 ? 2 : 1;
 
   return (
-    <div className="w-full max-w-3xl rounded-xl border border-foreground/10 bg-surface p-6 shadow-lg sm:p-8">
+    <div className="min-h-screen bg-background text-foreground">
+      <AdminNavbar />
+
+      <main className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
+        <div className="rounded-xl border border-foreground/10 bg-surface p-6 shadow-lg sm:p-8">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h1 className="logo text-xl text-primary">Rating match</h1>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
@@ -293,6 +298,8 @@ export default async function AdminRatingMatchDetailPage({ params, searchParams 
           </form>
         )}
       </section>
+        </div>
+      </main>
     </div>
   );
 }

@@ -28,6 +28,7 @@ export async function GET(request: Request) {
   const raw = searchParams.get("q")?.trim() ?? "";
   const tournamentIdRaw = searchParams.get("tournamentId");
   const tournamentId = tournamentIdRaw ? parseInt(tournamentIdRaw, 10) : NaN;
+  const sortByName = searchParams.get("sort") === "name";
 
   if (raw.length < 2) {
     return NextResponse.json({ players: [] });
@@ -105,9 +106,18 @@ export async function GET(request: Request) {
     }
   }
 
-  const players = [...map.values()]
-    .sort((a, b) => b.rating - a.rating)
-    .slice(0, 25);
+  const merged = [...map.values()];
+  if (sortByName) {
+    merged.sort((a, b) => {
+      const ln = a.lastname.localeCompare(b.lastname, "es", { sensitivity: "base" });
+      if (ln !== 0) return ln;
+      return a.name.localeCompare(b.name, "es", { sensitivity: "base" });
+    });
+  } else {
+    merged.sort((a, b) => b.rating - a.rating);
+  }
+
+  const players = merged.slice(0, sortByName ? 50 : 25);
 
   return NextResponse.json({ players });
 }

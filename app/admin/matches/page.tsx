@@ -30,9 +30,12 @@ export default async function AdminMatchesPage() {
       <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-12">
         <div className="mb-8 flex flex-col items-center gap-6 text-center">
           <h1 className="logo text-2xl text-primary sm:text-3xl">Partidos (rating)</h1>
-          <div className="mx-auto flex w-full max-w-xl flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
+          <div className="mx-auto flex w-full max-w-xl flex-col items-center justify-center gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
             <Link href="/admin" className={adminCtaClass}>
               Inicio
+            </Link>
+            <Link href="/admin/matches/create" className={adminCtaClass}>
+              Nuevo partido
             </Link>
           </div>
         </div>
