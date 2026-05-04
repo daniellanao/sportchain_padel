@@ -23,12 +23,15 @@ export default async function AdminHomePage() {
       <main className="mx-auto max-w-6xl px-4 py-10 text-center sm:px-6 sm:py-12">
         <h1 className="logo mb-2 text-2xl text-primary sm:text-3xl">ADMIN</h1>
 
-        <div className="mx-auto mt-8 flex w-full max-w-xl flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
+        <div className="mx-auto mt-8 flex w-full max-w-xl flex-col items-center justify-center gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
           <Link href="/admin/tournaments" className={adminCtaClass}>
             Torneos
           </Link>
           <Link href="/admin/players" className={adminCtaClass}>
             Jugadores
+          </Link>
+          <Link href="/admin/matches" className={adminCtaClass}>
+            Partidos
           </Link>
         </div>
       </main>
