@@ -119,31 +119,32 @@ export function getCommunityTournamentWhatsappMessage(t: CommunityTournament): s
 }
 
 export const COMMUNITY_UPCOMING_TOURNAMENTS: CommunityTournament[] = [
-  /**
+  
   {
-    id: "torneo-mixto-2026-04-18-adictos",
-    name: "Torneo Mixto",
-    dateLabel: "18 de abril de 2026",
-    timeLabel: "14:30",
-    formatLabel: "Formato americano",
-    category: "Suma 14",
-    venue: "Sportium Alcorta",
-    organizer: "Adictos al pádel",
-    whatsappE164: "+5491139409498",
-    imageUrl: "/torneos/aleph_padel_tournament.png",
-  },
-  {
-    id: "torneo-americano-2026-04-18-adictos",
+    id: "delpa_torneo_c8c7",
     name: "Torneo Americano",
-    dateLabel: "18 de abril de 2026",
-    timeLabel: "17:00",
+    dateLabel: "09 de mayo de 2026",
+    timeLabel: "19:00",
     formatLabel: "Formato americano",
-    category: "Caballeros 6.ª",
-    venue: "Sportium Alcorta",
-    organizer: "Adictos al pádel",
-    whatsappE164: "+5491139409498",
+    category: "C8/C7",
+    venue: "Delpa - José Hernandez 1373",
+    organizer: "Delpa",
+    whatsappE164: "+5491122827442",
     imageUrl: "/torneos/aleph_padel_tournament.png",
   },
+  {
+    id: "delpa_torneo_c6c5",
+    name: "Torneo Americano",
+    dateLabel: "10 de Mayo de 2026",
+    timeLabel: "16:00",
+    formatLabel: "Formato americano",
+    category: "C6 / C5",
+    venue: "Delpa - José Hernandez 1373",
+    organizer: "Delpa",
+    whatsappE164: "+5491122827442",
+    imageUrl: "/torneos/aleph_padel_tournament.png",
+  },
+  /**
   {
     id: "torneo-mixto-2026-04-18-adictos",
     name: "Torneo Mixto",
