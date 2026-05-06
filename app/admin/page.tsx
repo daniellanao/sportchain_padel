@@ -36,6 +36,12 @@ export default async function AdminHomePage() {
           <Link href="/admin/organizers" className={adminCtaClass}>
             Organizadores
           </Link>
+          <Link href="/admin/open-tournaments" className={adminCtaClass}>
+            Torneos abiertos
+          </Link>
+          <Link href="/admin/venues" className={adminCtaClass}>
+            Sedes
+          </Link>
         </div>
       </main>
     </div>

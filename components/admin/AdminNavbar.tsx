@@ -1,6 +1,8 @@
 import {
   faBriefcase,
+  faCalendarDays,
   faHandshake,
+  faLocationDot,
   faRightFromBracket,
   faTrophy,
   faUsers,
@@ -34,6 +36,14 @@ export function AdminNavbar() {
       <Link href="/admin/organizers" className={`${itemClass} border-r border-white/15`}>
         <FontAwesomeIcon icon={faBriefcase} className="h-3 w-3 shrink-0 sm:h-3.5 sm:w-3.5" aria-hidden />
         <span className="truncate">Organizadores</span>
+      </Link>
+      <Link href="/admin/open-tournaments" className={`${itemClass} border-r border-white/15`}>
+        <FontAwesomeIcon icon={faCalendarDays} className="h-3 w-3 shrink-0 sm:h-3.5 sm:w-3.5" aria-hidden />
+        <span className="truncate">Abiertos</span>
+      </Link>
+      <Link href="/admin/venues" className={`${itemClass} border-r border-white/15`}>
+        <FontAwesomeIcon icon={faLocationDot} className="h-3 w-3 shrink-0 sm:h-3.5 sm:w-3.5" aria-hidden />
+        <span className="truncate">Sedes</span>
       </Link>
       <form action={adminLogoutAction} className="flex min-w-0 flex-1">
         <button type="submit" className={`${itemClass} w-full cursor-pointer`}>
