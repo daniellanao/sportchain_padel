@@ -1,4 +1,5 @@
 import {
+  faBriefcase,
   faHandshake,
   faRightFromBracket,
   faTrophy,
@@ -29,6 +30,10 @@ export function AdminNavbar() {
       <Link href="/admin/players" className={`${itemClass} border-r border-white/15`}>
         <FontAwesomeIcon icon={faUsers} className="h-3 w-3 shrink-0 sm:h-3.5 sm:w-3.5" aria-hidden />
         <span className="truncate">Jugadores</span>
+      </Link>
+      <Link href="/admin/organizers" className={`${itemClass} border-r border-white/15`}>
+        <FontAwesomeIcon icon={faBriefcase} className="h-3 w-3 shrink-0 sm:h-3.5 sm:w-3.5" aria-hidden />
+        <span className="truncate">Organizadores</span>
       </Link>
       <form action={adminLogoutAction} className="flex min-w-0 flex-1">
         <button type="submit" className={`${itemClass} w-full cursor-pointer`}>

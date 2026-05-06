@@ -33,6 +33,9 @@ export default async function AdminHomePage() {
           <Link href="/admin/matches" className={adminCtaClass}>
             Partidos
           </Link>
+          <Link href="/admin/organizers" className={adminCtaClass}>
+            Organizadores
+          </Link>
         </div>
       </main>
     </div>
