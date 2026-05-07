@@ -96,6 +96,7 @@ export async function createTournamentAction(formData: FormData): Promise<void> 
     total_rounds: toOptionalPositiveInt(formData.get("total_rounds")),
     description: toOptionalText(formData.get("description")),
     image: toOptionalText(formData.get("image")),
+    register_url: toOptionalText(formData.get("register_url")),
   };
 
   const { error } = await supabase.from("tournaments").insert(payload);

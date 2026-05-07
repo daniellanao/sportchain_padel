@@ -18,6 +18,7 @@ export type TournamentDbRow = {
   created_at: string | null;
   updated_at: string | null;
   image: string | null;
+  register_url: string | null;
 };
 
 function normalizeImageUrl(image: string | null): string | undefined {
@@ -109,6 +110,7 @@ function rowToTournament(row: TournamentDbRow, listStatus: Tournament["status"])
     adminStatus: normalizeAdminStatus(row),
     imageUrl: normalizeImageUrl(row.image),
     location: row.location?.trim() || undefined,
+    registerUrl: row.register_url?.trim() || undefined,
   };
 }
 

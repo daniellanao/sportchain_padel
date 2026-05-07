@@ -118,6 +118,18 @@ export default async function AdminCreateTournamentPage({ searchParams }: PagePr
           />
         </label>
 
+        <label className="sm:col-span-2 flex flex-col gap-1">
+          <span className="text-xs font-semibold uppercase tracking-wide text-[color:var(--color-subtle-text)]">
+            URL de inscripción (opcional)
+          </span>
+          <input
+            name="register_url"
+            type="url"
+            className="rounded-lg border border-foreground/15 bg-background px-3 py-2 text-sm text-foreground outline-none ring-primary/40 focus:ring-2"
+            placeholder="https://…"
+          />
+        </label>
+
         <label className="flex flex-col gap-1">
           <span className="text-xs font-semibold uppercase tracking-wide text-[color:var(--color-subtle-text)]">
             Fecha inicio

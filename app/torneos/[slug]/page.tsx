@@ -99,6 +99,18 @@ export default async function TournamentBySlugPage({ params }: PageProps) {
         <h2 className="text-xl font-black uppercase text-[var(--color-primary)] sm:text-3xl">
           {tournament.name}
         </h2>
+        {tournament.registerUrl?.trim() ? (
+          <p className="mt-4">
+            <a
+              href={tournament.registerUrl.trim()}
+              target="_blank"
+              rel="noreferrer"
+              className="navbar-text inline-flex border-2 border-[var(--color-accent-gold)] bg-[var(--color-primary)] px-4 py-2 text-xs uppercase text-white transition hover:brightness-110"
+            >
+              Inscribirme
+            </a>
+          </p>
+        ) : null}
         <StandingsTable rows={standingsRows} title="Standings" />
 
         <RoundMatches rounds={roundMatchesRounds} />

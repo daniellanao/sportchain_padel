@@ -8,6 +8,7 @@ import { isAdminSessionValid } from "@/app/admin/actions";
 import {
   addPlayerToTournamentAction,
   removePlayerFromTournamentAction,
+  updateTournamentAction,
 } from "@/app/admin/tournaments/[slug]/actions";
 import { AdminNavbar } from "@/components/admin/AdminNavbar";
 import { PlayerSearchPicker } from "@/components/admin/PlayerSearchPicker";
@@ -94,10 +95,25 @@ function rowEntries(t: TournamentDbRow): Array<[string, string]> {
     ["Rondas", t.total_rounds != null ? String(t.total_rounds) : "—"],
     ["Descripcion", t.description ?? "—"],
     ["Imagen", t.image ?? "—"],
+    ["URL inscripcion", t.register_url ?? "—"],
     ["Creado", formatDateTime(t.created_at)],
     ["Actualizado", formatDateTime(t.updated_at)],
   ];
 }
+
+function toDatetimeLocalValue(iso: string | null): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+const fieldClass =
+  "rounded-lg border border-foreground/15 bg-background px-3 py-2 text-sm text-foreground outline-none ring-primary/40 focus:ring-2";
+
+const fieldLabelClass =
+  "text-xs font-semibold uppercase tracking-wide text-[color:var(--color-subtle-text)]";
 
 export default async function AdminTournamentDetailPage({ params, searchParams }: PageProps) {
   const ok = await isAdminSessionValid();
@@ -175,6 +191,113 @@ export default async function AdminTournamentDetailPage({ params, searchParams }
             {success}
           </p>
         ) : null}
+
+        <section className={`${cardClass} mb-6 p-4 sm:p-6`}>
+          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-[color:var(--color-subtle-text)]">
+            Editar torneo
+          </h2>
+          <form action={updateTournamentAction} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <input type="hidden" name="tournamentId" value={tournament.id} />
+            <input type="hidden" name="currentSlug" value={slug} />
+            <label className="flex flex-col gap-1">
+              <span className={fieldLabelClass}>Nombre *</span>
+              <input name="name" required defaultValue={tournament.name} className={fieldClass} />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className={fieldLabelClass}>Slug</span>
+              <input name="slug" defaultValue={tournament.slug ?? ""} className={fieldClass} />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className={fieldLabelClass}>Formato</span>
+              <select name="format" defaultValue={tournament.format ?? "swiss"} className={fieldClass}>
+                <option value="swiss">Swiss</option>
+                <option value="american">American</option>
+              </select>
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className={fieldLabelClass}>Estado</span>
+              <select name="status" defaultValue={tournament.status ?? "draft"} className={fieldClass}>
+                <option value="draft">Draft</option>
+                <option value="open">Open</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className={fieldLabelClass}>Ubicacion</span>
+              <input name="location" defaultValue={tournament.location ?? ""} className={fieldClass} />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className={fieldLabelClass}>Imagen (URL o path)</span>
+              <input name="image" defaultValue={tournament.image ?? ""} className={fieldClass} />
+            </label>
+            <label className="sm:col-span-2 flex flex-col gap-1">
+              <span className={fieldLabelClass}>URL de inscripción (opcional)</span>
+              <input
+                name="register_url"
+                type="url"
+                defaultValue={tournament.register_url ?? ""}
+                placeholder="https://…"
+                className={fieldClass}
+              />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className={fieldLabelClass}>Fecha inicio</span>
+              <input
+                name="start_date"
+                type="datetime-local"
+                defaultValue={toDatetimeLocalValue(tournament.start_date)}
+                className={fieldClass}
+              />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className={fieldLabelClass}>Fecha fin</span>
+              <input
+                name="end_date"
+                type="datetime-local"
+                defaultValue={toDatetimeLocalValue(tournament.end_date)}
+                className={fieldClass}
+              />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className={fieldLabelClass}>Max teams</span>
+              <input
+                name="max_teams"
+                type="number"
+                min={1}
+                defaultValue={tournament.max_teams ?? ""}
+                className={fieldClass}
+              />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className={fieldLabelClass}>Total rounds</span>
+              <input
+                name="total_rounds"
+                type="number"
+                min={1}
+                defaultValue={tournament.total_rounds ?? ""}
+                className={fieldClass}
+              />
+            </label>
+            <label className="sm:col-span-2 flex flex-col gap-1">
+              <span className={fieldLabelClass}>Descripcion</span>
+              <textarea
+                name="description"
+                rows={4}
+                defaultValue={tournament.description ?? ""}
+                className={fieldClass}
+              />
+            </label>
+            <div className="sm:col-span-2">
+              <button
+                type="submit"
+                className="rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
+              >
+                Guardar cambios
+              </button>
+            </div>
+          </form>
+        </section>
 
         <details className={`${cardClass} group mb-6`}>
           <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-4 py-3 text-sm font-medium text-foreground transition hover:bg-muted/50 sm:px-5 sm:py-4 [&::-webkit-details-marker]:hidden [&::marker]:content-none">

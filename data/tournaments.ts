@@ -31,6 +31,8 @@ export type Tournament = {
   imageUrl?: string;
   /** Venue / city (e.g. from Supabase `location`) */
   location?: string;
+  /** External registration URL (Supabase `register_url`) */
+  registerUrl?: string;
   /** Minimum ELO required to register (optional) */
   minElo?: number;
   /** Categoría opcional (p. ej. mensaje WhatsApp por defecto) */
