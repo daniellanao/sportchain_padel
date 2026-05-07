@@ -15,6 +15,7 @@ import {
   deleteOpenTournamentAction,
   updateOpenTournamentAction,
 } from "@/app/admin/open-tournaments/actions";
+import { formatArgentinaDateTimeMedium, toDatetimeLocalValueArgentina } from "@/lib/date-argentina";
 
 export type AdminOpenTournamentRow = {
   id: number;
@@ -35,24 +36,11 @@ export type AdminOrganizerOption = { id: number; name: string };
 export type AdminVenueOption = { id: number; name: string };
 
 function toDatetimeLocalValue(iso: string | null): string {
-  if (!iso) return "";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "";
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  return toDatetimeLocalValueArgentina(iso);
 }
 
 function formatDateShort(iso: string | null): string {
-  if (!iso) return "—";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "—";
-  return d.toLocaleString("es", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  return formatArgentinaDateTimeMedium(iso);
 }
 
 const inputClass =

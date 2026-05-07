@@ -1,5 +1,5 @@
 import type { Tournament, TournamentFormat } from "@/data/tournaments";
-
+import { parseStartDateArgentina as parseStartDate } from "@/lib/date-argentina";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 /** Row shape for `public.tournaments` */
@@ -26,43 +26,6 @@ function normalizeImageUrl(image: string | null): string | undefined {
   const t = image.trim();
   if (t.startsWith("http://") || t.startsWith("https://")) return t;
   return t.startsWith("/") ? t : `/${t}`;
-}
-
-function parseStartDate(start: string | null): Pick<
-  Tournament,
-  "dateISO" | "time24h" | "dateLabel" | "timeLabel"
-> {
-  if (!start) {
-    return {
-      dateISO: "",
-      time24h: "00:00",
-      dateLabel: "Por confirmar",
-      timeLabel: "—",
-    };
-  }
-  const d = new Date(start);
-  if (Number.isNaN(d.getTime())) {
-    return {
-      dateISO: "",
-      time24h: "00:00",
-      dateLabel: "Por confirmar",
-      timeLabel: "—",
-    };
-  }
-  const dateISO = d.toISOString().slice(0, 10);
-  const hours = String(d.getHours()).padStart(2, "0");
-  const minutes = String(d.getMinutes()).padStart(2, "0");
-  const time24h = `${hours}:${minutes}`;
-  const dateLabel = d.toLocaleDateString("es", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-  const timeLabel = d.toLocaleTimeString("es", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-  return { dateISO, time24h, dateLabel, timeLabel };
 }
 
 function toFormat(f: string | null): TournamentFormat {

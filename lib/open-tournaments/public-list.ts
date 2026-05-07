@@ -1,3 +1,4 @@
+import { formatArgentinaStartLabels } from "@/lib/date-argentina";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 import type { OpenTournamentDbRow } from "@/lib/open-tournaments/supabase-open-tournaments";
@@ -27,27 +28,6 @@ function normalizeImageUrl(image: string | null | undefined): string | undefined
   const t = image.trim();
   if (t.startsWith("http://") || t.startsWith("https://")) return t;
   return t.startsWith("/") ? t : `/${t}`;
-}
-
-function parseStartLabels(start: string | null): { dateLabel: string; timeLabel: string } {
-  if (!start) {
-    return { dateLabel: "Por confirmar", timeLabel: "—" };
-  }
-  const d = new Date(start);
-  if (Number.isNaN(d.getTime())) {
-    return { dateLabel: "Por confirmar", timeLabel: "—" };
-  }
-  return {
-    dateLabel: d.toLocaleDateString("es", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    }),
-    timeLabel: d.toLocaleTimeString("es", {
-      hour: "2-digit",
-      minute: "2-digit",
-    }),
-  };
 }
 
 /** Pasado = `end_date` existe y ya terminó. */
@@ -110,7 +90,7 @@ export async function fetchUpcomingOpenTournamentsForPublic(): Promise<OpenTourn
   const upcoming: OpenTournamentPublicItem[] = upcomingRows.map((r) => {
     const org = orgById.get(r.organizer_id);
     const venue = r.venue_id != null ? venueById.get(r.venue_id) : undefined;
-    const { dateLabel, timeLabel } = parseStartLabels(r.start_date);
+    const { dateLabel, timeLabel } = formatArgentinaStartLabels(r.start_date);
     return {
       id: r.id,
       name: r.name,
@@ -131,8 +111,5 @@ export async function fetchUpcomingOpenTournamentsForPublic(): Promise<OpenTourn
 }
 
 export function buildOpenTournamentWhatsappMessage(t: OpenTournamentPublicItem): string {
-  const venueLine =
-    [t.venueName, t.venueAddress].filter(Boolean).join(" · ") || "—";
-  const cat = t.category?.trim();
-  return `Estoy interesado en participar en el *${t.name}*${cat ? ` (${cat})` : ""} del ${t.dateLabel} a las ${t.timeLabel}. Sede: ${venueLine}. Organiza: ${t.organizerName}. Enviado desde Sportchain`;
+  return `Estoy interesado en ${t.name} del ${t.dateLabel} a las ${t.timeLabel}.`;
 }

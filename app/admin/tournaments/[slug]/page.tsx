@@ -13,6 +13,7 @@ import {
 import { AdminNavbar } from "@/components/admin/AdminNavbar";
 import { PlayerSearchPicker } from "@/components/admin/PlayerSearchPicker";
 import type { PlayerDbRow } from "@/lib/ranking/supabase-players";
+import { formatArgentinaDateTimeMedium, toDatetimeLocalValueArgentina } from "@/lib/date-argentina";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
   normalizeAdminTournamentStatus,
@@ -70,10 +71,7 @@ type TournamentPlayerRelation = {
 };
 
 function formatDateTime(value: string | null): string {
-  if (!value) return "—";
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return value;
-  return d.toLocaleString("es-ES");
+  return formatArgentinaDateTimeMedium(value);
 }
 
 function getRelationPlayer(value: TournamentPlayerRelation["players"]): RelationPlayer | null {
@@ -102,11 +100,7 @@ function rowEntries(t: TournamentDbRow): Array<[string, string]> {
 }
 
 function toDatetimeLocalValue(iso: string | null): string {
-  if (!iso) return "";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "";
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  return toDatetimeLocalValueArgentina(iso);
 }
 
 const fieldClass =
