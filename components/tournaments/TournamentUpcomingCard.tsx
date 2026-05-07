@@ -1,14 +1,9 @@
-import {
-  faCalendarDays,
-  faClock,
-  faLayerGroup,
-  faUsers,
-} from "@fortawesome/free-solid-svg-icons";
+import { faCalendarDays, faClock } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
 import Link from "next/link";
 
-import { formatTournamentFormatLabel, type Tournament } from "@/data/tournaments";
+import { type Tournament } from "@/data/tournaments";
 import { isRemoteImageSrc } from "@/lib/image-remote";
 
 export type TournamentUpcomingCardProps = {
@@ -16,137 +11,109 @@ export type TournamentUpcomingCardProps = {
 };
 
 /**
- * Tarjeta para la cuadrícula de torneos próximos en `/torneos`.
+ * Tarjeta en `/torneos`: fila 1 — imagen cuadrada a la izquierda, título + fecha + hora a la derecha;
+ * fila 2 — botones Ver torneo e Inscribirse (`registerUrl`).
  */
 export function TournamentUpcomingCard({ tournament: t }: TournamentUpcomingCardProps) {
+  const registerHref = t.registerUrl?.trim();
+  const registered = t.registeredPlayerCount ?? 0;
+  const maxSlots = t.playerCount;
+  const showRegistrationRatio = maxSlots > 0;
+
   return (
-    <li
-      data-slug={t.slug}
-      className="flex flex-col border-4 border-[var(--color-primary)] bg-[var(--color-muted)]/50 p-4 shadow-[6px_6px_0_rgba(0,0,0,0.15)] sm:p-5"
-    >
-      <div className="group flex min-h-0 flex-1 flex-col gap-4 sm:flex-row sm:items-stretch sm:gap-5">
-        {t.imageUrl ? (
-          <div className="relative aspect-[16/10] w-full shrink-0 overflow-hidden border-2 border-[var(--color-accent-gold)] bg-[var(--color-surface)] sm:aspect-[3/4] sm:w-44 md:w-52">
-            <Image
-              src={t.imageUrl}
-              alt={t.name}
-              fill
-              className="object-cover transition group-hover:brightness-95"
-              sizes="(max-width: 640px) 100vw, 208px"
-              priority
-              unoptimized={isRemoteImageSrc(t.imageUrl)}
-            />
+    <li data-slug={t.slug} className="flex h-full min-h-0">
+      <div className="flex min-h-0 w-full min-w-0 flex-col border-4 border-[var(--color-primary)] bg-[var(--color-muted)]/50 shadow-[6px_6px_0_rgba(0,0,0,0.15)]">
+        {/* Fila 1: imagen | texto */}
+        <div className="flex flex-row gap-2.5 p-2.5 sm:gap-3 sm:p-3">
+          <div className="relative aspect-square w-[4.25rem] shrink-0 overflow-hidden border-2 border-[var(--color-accent-gold)] bg-[var(--color-surface)] sm:w-24 md:w-28">
+            {t.imageUrl ? (
+              <Image
+                src={t.imageUrl}
+                alt={t.name}
+                fill
+                className="object-cover"
+                sizes="80px, 112px"
+                priority
+                unoptimized={isRemoteImageSrc(t.imageUrl)}
+              />
+            ) : (
+              <div
+                className="absolute inset-0 bg-[linear-gradient(135deg,var(--color-muted)_0%,var(--color-surface)_100%)]"
+                aria-hidden
+              />
+            )}
           </div>
-        ) : null}
-        <div className="flex min-w-0 flex-1 flex-col">
-          <div className="mb-2">
-            <h5 className="mb-1 block text-sm font-bold uppercase text-[var(--color-primary)]">
-              Próximamente
-            </h5>
+
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col justify-center gap-2">
             <Link
               href={`/torneos/${t.slug}`}
-              className="block min-w-0 flex-1 text-base font-black uppercase leading-tight text-[var(--color-primary)] hover:underline sm:text-lg"
+              className="line-clamp-2 min-w-0 text-xs font-black uppercase leading-tight text-[var(--color-primary)] hover:underline sm:text-sm"
             >
               {t.name}
             </Link>
-           
-          </div>
 
-          {t.minElo != null ? (
-            <div
-              className="mb-3 border-4 border-[var(--color-accent-gold)] bg-[var(--color-primary)] px-3 py-4 text-center shadow-[4px_4px_0_rgba(0,0,0,0.3)]"
-              role="status"
-              aria-label={`ELO mínimo requerido: ${t.minElo}`}
-            >
-              <p className="navbar-text text-[10px] uppercase tracking-[0.2em] text-[var(--color-accent-gold)]">
-                ELO mínimo
-              </p>
-              <p className="navbar-text mt-1 text-4xl font-black leading-none tabular-nums text-white sm:text-5xl">
-                {t.minElo}
-              </p>
-              <p className="mt-2 text-xs font-medium text-[rgba(232,236,245,0.9)]">
-                Necesitas al menos esta puntuación para apuntarte
-              </p>
+            <div className="space-y-1.5 text-[10px] sm:text-xs">
+              <div className="flex gap-1.5">
+                <FontAwesomeIcon
+                  icon={faCalendarDays}
+                  className="mt-0.5 h-3 w-3 shrink-0 text-[var(--color-primary)]"
+                  aria-hidden
+                />
+                <div className="min-w-0">
+                  <span className="navbar-text block text-[9px] uppercase text-[var(--color-subtle-text)]">Fecha</span>
+                  <span className="font-medium leading-snug text-[var(--color-foreground)]">{t.dateLabel}</span>
+                </div>
+              </div>
+              <div className="flex items-end justify-between gap-2">
+                <div className="flex min-w-0 gap-1.5">
+                  <FontAwesomeIcon
+                    icon={faClock}
+                    className="mt-0.5 h-3 w-3 shrink-0 self-start text-[var(--color-primary)]"
+                    aria-hidden
+                  />
+                  <div className="min-w-0">
+                    <span className="navbar-text block text-[9px] uppercase text-[var(--color-subtle-text)]">Hora</span>
+                    <span className="font-medium leading-snug text-[var(--color-foreground)]">{t.timeLabel}</span>
+                  </div>
+                </div>
+                {showRegistrationRatio ? (
+                  <span
+                    className="navbar-text shrink-0 text-[9px] font-bold tabular-nums text-[var(--color-primary)] sm:text-[10px]"
+                    title="Inscritos / plazas máximas"
+                  >
+                    {registered}/{maxSlots}
+                  </span>
+                ) : registered > 0 ? (
+                  <span
+                    className="navbar-text shrink-0 text-[9px] font-bold tabular-nums text-[var(--color-primary)] sm:text-[10px]"
+                    title="Jugadores inscritos"
+                  >
+                    {registered}
+                  </span>
+                ) : null}
+              </div>
             </div>
-          ) : null}
+          </div>
+        </div>
 
-          <table className="w-full flex-1 border-collapse text-sm">
-            <tbody>
-              <tr className="border-b border-[var(--color-foreground)]/10">
-                <th
-                  scope="row"
-                  className="w-0 py-2 pr-2 align-middle text-left font-normal"
-                >
-                  <span className="inline-flex items-center gap-2 text-[var(--color-subtle-text)]">
-                    <FontAwesomeIcon
-                      icon={faCalendarDays}
-                      className="h-3.5 w-3.5 shrink-0 text-[var(--color-primary)]"
-                      aria-hidden
-                    />
-                    <span className="navbar-text text-[10px] uppercase">Fecha</span>
-                  </span>
-                </th>
-                <td className="py-2 pl-1 font-medium text-[var(--color-foreground)]">{t.dateLabel}</td>
-              </tr>
-              <tr className="border-b border-[var(--color-foreground)]/10">
-                <th scope="row" className="w-0 py-2 pr-2 align-middle text-left font-normal">
-                  <span className="inline-flex items-center gap-2 text-[var(--color-subtle-text)]">
-                    <FontAwesomeIcon
-                      icon={faClock}
-                      className="h-3.5 w-3.5 shrink-0 text-[var(--color-primary)]"
-                      aria-hidden
-                    />
-                    <span className="navbar-text text-[10px] uppercase">Hora de inicio</span>
-                  </span>
-                </th>
-                <td className="py-2 pl-1 font-medium text-[var(--color-foreground)]">{t.timeLabel}</td>
-              </tr>
-              <tr className="border-b border-[var(--color-foreground)]/10">
-                <th scope="row" className="w-0 py-2 pr-2 align-middle text-left font-normal">
-                  <span className="inline-flex items-center gap-2 text-[var(--color-subtle-text)]">
-                    <FontAwesomeIcon
-                      icon={faUsers}
-                      className="h-3.5 w-3.5 shrink-0 text-[var(--color-primary)]"
-                      aria-hidden
-                    />
-                    <span className="navbar-text text-[10px] uppercase">Jugadores (máx.)</span>
-                  </span>
-                </th>
-                <td className="py-2 pl-1 font-medium tabular-nums text-[var(--color-foreground)]">
-                  {t.playerCount}
-                </td>
-              </tr>
-              <tr>
-                <th scope="row" className="w-0 py-2 pr-2 align-middle text-left font-normal">
-                  <span className="inline-flex items-center gap-2 text-[var(--color-subtle-text)]">
-                    <FontAwesomeIcon
-                      icon={faLayerGroup}
-                      className="h-3.5 w-3.5 shrink-0 text-[var(--color-primary)]"
-                      aria-hidden
-                    />
-                    <span className="navbar-text text-[10px] uppercase">Formato</span>
-                  </span>
-                </th>
-                <td className="py-2 pl-1 font-medium text-[var(--color-foreground)]">
-                  {formatTournamentFormatLabel(t)}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        {/* Fila 2: botones */}
+        <div className="flex flex-col gap-2 border-t-2 border-[var(--color-primary)]/20 px-2.5 pb-2.5 pt-2 sm:flex-row sm:px-3 sm:pb-3 sm:pt-2.5">
           <Link
             href={`/torneos/${t.slug}`}
-            className="navbar-text btn-gold mt-4 inline-flex min-h-[40px] w-full items-center justify-center border-2 border-[var(--color-accent-gold)] px-4 py-2 text-center text-xs uppercase"
+            className="navbar-text btn-gold inline-flex min-h-[36px] flex-1 items-center justify-center border-2 border-[var(--color-accent-gold)] px-2 py-1.5 text-center text-[9px] uppercase sm:min-h-[40px] sm:text-[10px]"
           >
             Ver torneo
           </Link>
-          <Link
-            href="https://luma.com/71kuw9xx"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="navbar-text btn-gold mt-4 inline-flex min-h-[40px] w-full items-center justify-center border-2 border-[var(--color-accent-gold)] px-4 py-2 text-center text-xs uppercase"
-          >
-            Inscribirse
-          </Link>
+          {registerHref ? (
+            <Link
+              href={registerHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="navbar-text btn-gold inline-flex min-h-[36px] flex-1 items-center justify-center border-2 border-[var(--color-accent-gold)] px-2 py-1.5 text-center text-[9px] uppercase sm:min-h-[40px] sm:text-[10px]"
+            >
+              Inscribirse
+            </Link>
+          ) : null}
         </div>
       </div>
     </li>

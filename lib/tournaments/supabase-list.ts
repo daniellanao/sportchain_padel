@@ -94,7 +94,11 @@ export function normalizeAdminTournamentStatus(row: TournamentDbRow): "open" | "
   return normalizeAdminStatus(row);
 }
 
-function rowToTournament(row: TournamentDbRow, listStatus: Tournament["status"]): Tournament {
+function rowToTournament(
+  row: TournamentDbRow,
+  listStatus: Tournament["status"],
+  registeredPlayerCount = 0,
+): Tournament {
   const dates = parseStartDate(row.start_date);
   const slug = row.slug?.trim() || `tournament-${row.id}`;
   const maxTeams = row.max_teams ?? 0;
@@ -104,6 +108,7 @@ function rowToTournament(row: TournamentDbRow, listStatus: Tournament["status"])
     name: row.name,
     ...dates,
     playerCount: maxTeams > 0 ? maxTeams * 2 : 0,
+    registeredPlayerCount,
     format: toFormat(row.format),
     rounds: row.total_rounds ?? 0,
     status: listStatus,
@@ -112,6 +117,28 @@ function rowToTournament(row: TournamentDbRow, listStatus: Tournament["status"])
     location: row.location?.trim() || undefined,
     registerUrl: row.register_url?.trim() || undefined,
   };
+}
+
+async function fetchRegisteredCountsByTournamentId(
+  supabase: NonNullable<ReturnType<typeof createSupabaseServerClient>>,
+  tournamentIds: number[],
+): Promise<Map<number, number>> {
+  const map = new Map<number, number>();
+  if (tournamentIds.length === 0) return map;
+
+  const { data, error } = await supabase
+    .from("player_tournament")
+    .select("tournament_id")
+    .in("tournament_id", tournamentIds);
+
+  if (error || !data) return map;
+
+  for (const row of data as { tournament_id: number }[]) {
+    const tid = Number(row.tournament_id);
+    if (!Number.isFinite(tid)) continue;
+    map.set(tid, (map.get(tid) ?? 0) + 1);
+  }
+  return map;
 }
 
 function statusFromRow(row: TournamentDbRow): Tournament["status"] {
@@ -155,15 +182,21 @@ export async function fetchTournamentsListFromSupabase(): Promise<TournamentsLis
   const rows = ((data ?? []) as TournamentDbRow[]).filter((r) => r.status !== "cancelled");
   const now = Date.now();
 
+  const registeredById = await fetchRegisteredCountsByTournamentId(
+    supabase,
+    rows.map((r) => r.id),
+  );
+
   const upcoming: Tournament[] = [];
   const past: Tournament[] = [];
 
   for (const row of rows) {
+    const registered = registeredById.get(row.id) ?? 0;
     const pastFlag = isPastRow(row, now);
     if (pastFlag) {
-      past.push(rowToTournament(row, "completed"));
+      past.push(rowToTournament(row, "completed", registered));
     } else {
-      upcoming.push(rowToTournament(row, "upcoming"));
+      upcoming.push(rowToTournament(row, "upcoming", registered));
     }
   }
 
@@ -223,6 +256,12 @@ export async function fetchTournamentBySlugFromSupabase(
   }
 
   const row = data as TournamentDbRow;
-  const tournament = rowToTournament(row, statusFromRow(row));
+
+  const { count: registeredCount } = await supabase
+    .from("player_tournament")
+    .select("*", { count: "exact", head: true })
+    .eq("tournament_id", row.id);
+
+  const tournament = rowToTournament(row, statusFromRow(row), registeredCount ?? 0);
   return { ok: true, tournament };
 }

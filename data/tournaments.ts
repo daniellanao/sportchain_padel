@@ -20,7 +20,10 @@ export type Tournament = {
   dateLabel: string;
   /** Human-readable time for UI */
   timeLabel: string;
+  /** Plazas máximas (jugadores): `max_teams * 2` desde Supabase */
   playerCount: number;
+  /** Inscritos en `player_tournament` (solo rellenado al cargar desde Supabase) */
+  registeredPlayerCount?: number;
   format: TournamentFormat;
   /** Number of rounds (meaning depends on format) */
   rounds: number;
