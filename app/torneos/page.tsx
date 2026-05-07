@@ -5,7 +5,7 @@ import { SportchainAbout } from "@/components/SportchainAbout";
 import { TournamentCommunityCard } from "@/components/tournaments/TournamentCommunityCard";
 import { TournamentPastCard } from "@/components/tournaments/TournamentPastCard";
 import { TournamentUpcomingCard } from "@/components/tournaments/TournamentUpcomingCard";
-import { COMMUNITY_UPCOMING_TOURNAMENTS } from "@/data/tournaments";
+import { fetchUpcomingOpenTournamentsForPublic } from "@/lib/open-tournaments/public-list";
 import { fetchTournamentsListFromSupabase } from "@/lib/tournaments/supabase-list";
 
 const description =
@@ -28,7 +28,10 @@ export const metadata: Metadata = {
 export const revalidate = 60;
 
 export default async function TournamentsPage() {
-  const result = await fetchTournamentsListFromSupabase();
+  const [result, openCommunity] = await Promise.all([
+    fetchTournamentsListFromSupabase(),
+    fetchUpcomingOpenTournamentsForPublic(),
+  ]);
   const { upcoming, past } = result;
 
   return (
@@ -45,6 +48,11 @@ export default async function TournamentsPage() {
         {!result.ok ? (
           <p className="mt-4 rounded border-2 border-amber-600/60 bg-amber-950/20 px-4 py-3 text-sm text-amber-100">
             {result.error}
+          </p>
+        ) : null}
+        {!openCommunity.ok ? (
+          <p className="mt-2 rounded border-2 border-amber-600/60 bg-amber-950/20 px-4 py-3 text-sm text-amber-100">
+            {openCommunity.error}
           </p>
         ) : null}
 
@@ -73,14 +81,14 @@ export default async function TournamentsPage() {
           <p className="mb-4 text-sm text-[color:var(--color-subtle-text)]">
             Torneos abiertos organizados por la comunidad; validos para sumar puntos a tu ranking.
           </p>
-          {COMMUNITY_UPCOMING_TOURNAMENTS.length === 0 ? (
+          {openCommunity.upcoming.length === 0 ? (
             <p className="text-sm text-[color:var(--color-subtle-text)]">No hay eventos en esta lista.</p>
           ) : (
             <ul
-              className="grid list-none grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2"
+              className="grid list-none grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-4"
               role="list"
             >
-              {COMMUNITY_UPCOMING_TOURNAMENTS.map((t) => (
+              {openCommunity.upcoming.map((t) => (
                 <TournamentCommunityCard key={t.id} tournament={t} />
               ))}
             </ul>
