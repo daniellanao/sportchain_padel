@@ -42,7 +42,7 @@ export function TournamentCommunityCard({ tournament: t }: TournamentCommunityCa
 
         {/* 2 — Imagen cuadrada | Fecha, Hora, Categoría */}
         <div className="flex flex-row gap-2.5 p-2.5 sm:gap-3 sm:p-3">
-          <div className="relative aspect-square w-[4.25rem] shrink-0 overflow-hidden border-2 border-[var(--color-accent-gold)] bg-[var(--color-surface)] sm:w-24 md:w-28">
+          <div className="relative aspect-square w-[4.25rem] shrink-0 self-start overflow-hidden border-2 border-[var(--color-accent-gold)] bg-[var(--color-surface)] sm:w-24 md:w-28">
             {t.organizerImageUrl ? (
               <Image
                 src={t.organizerImageUrl}

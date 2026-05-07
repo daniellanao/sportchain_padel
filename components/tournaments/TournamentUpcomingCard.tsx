@@ -25,7 +25,7 @@ export function TournamentUpcomingCard({ tournament: t }: TournamentUpcomingCard
       <div className="flex min-h-0 w-full min-w-0 flex-col border-4 border-[var(--color-primary)] bg-[var(--color-muted)]/50 shadow-[6px_6px_0_rgba(0,0,0,0.15)]">
         {/* Fila 1: imagen | texto */}
         <div className="flex flex-row gap-2.5 p-2.5 sm:gap-3 sm:p-3">
-          <div className="relative aspect-square w-[4.25rem] shrink-0 overflow-hidden border-2 border-[var(--color-accent-gold)] bg-[var(--color-surface)] sm:w-24 md:w-28">
+          <div className="relative aspect-square w-[4.25rem] shrink-0 self-start overflow-hidden border-2 border-[var(--color-accent-gold)] bg-[var(--color-surface)] sm:w-24 md:w-28">
             {t.imageUrl ? (
               <Image
                 src={t.imageUrl}
