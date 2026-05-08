@@ -1,7 +1,8 @@
 "use client";
 
-import { faMagnifyingGlass, faPen, faTrash, faUserPlus, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { faMagnifyingGlass, faPen, faTrash, faUserPlus, faUsers, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Link from "next/link";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 
 import {
@@ -248,6 +249,13 @@ export function AdminOrganizersTable({ organizers }: { organizers: AdminOrganize
                     </td>
                     <td className="whitespace-nowrap px-2 py-1.5 text-right align-middle">
                       <div className="inline-flex flex-wrap items-center justify-end gap-1">
+                        <Link
+                          href={`/admin/organizers/${o.slug}`}
+                          className="inline-flex items-center gap-1 rounded-md border border-foreground/15 bg-background px-2 py-1 text-[11px] font-medium uppercase tracking-wide text-primary transition hover:bg-muted"
+                        >
+                          <FontAwesomeIcon icon={faUsers} className="h-3 w-3" aria-hidden />
+                          Jugadores
+                        </Link>
                         <button
                           type="button"
                           onClick={() => openEdit(o)}

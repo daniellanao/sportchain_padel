@@ -10,6 +10,8 @@ export default function robots(): MetadataRoute.Robots {
       disallow: [
         /** Fichas de jugador bajo `/ranking/:id` — no indexar (lista general `/ranking` sí). */
         "/ranking/",
+        /** Fichas públicas de organizadores `/organizador/:slug` — no indexar. */
+        "/organizador/",
         /** Panel y rutas de administración. */
         "/admin/",
       ],

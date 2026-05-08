@@ -20,11 +20,12 @@ export type PlayerSearchRow = {
 };
 
 type Props = {
-  tournamentId: number;
+  tournamentId?: number;
+  organizerId?: number;
   submitClassName: string;
 };
 
-export function PlayerSearchPicker({ tournamentId, submitClassName }: Props) {
+export function PlayerSearchPicker({ tournamentId, organizerId, submitClassName }: Props) {
   const listboxId = useId();
   const containerRef = useRef<HTMLDivElement>(null);
   const [q, setQ] = useState("");
@@ -60,8 +61,11 @@ export function PlayerSearchPicker({ tournamentId, submitClassName }: Props) {
         setLoading(true);
         try {
           setFetchError(null);
+          const params = new URLSearchParams({ q: t });
+          if (tournamentId != null) params.set("tournamentId", String(tournamentId));
+          if (organizerId != null) params.set("organizerId", String(organizerId));
           const res = await fetch(
-            `/admin/api/players/search?q=${encodeURIComponent(t)}&tournamentId=${tournamentId}`,
+            `/admin/api/players/search?${params.toString()}`,
             { signal: ac.signal, credentials: "same-origin" }
           );
           const json = (await res.json()) as { players?: PlayerSearchRow[]; error?: string };
@@ -90,7 +94,7 @@ export function PlayerSearchPicker({ tournamentId, submitClassName }: Props) {
       clearTimeout(timer);
       ac.abort();
     };
-  }, [q, selected, tournamentId]);
+  }, [q, selected, tournamentId, organizerId]);
 
   const clearSelection = useCallback(() => {
     setSelected(null);

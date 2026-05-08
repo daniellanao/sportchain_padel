@@ -28,6 +28,8 @@ export async function GET(request: Request) {
   const raw = searchParams.get("q")?.trim() ?? "";
   const tournamentIdRaw = searchParams.get("tournamentId");
   const tournamentId = tournamentIdRaw ? parseInt(tournamentIdRaw, 10) : NaN;
+  const organizerIdRaw = searchParams.get("organizerId");
+  const organizerId = organizerIdRaw ? parseInt(organizerIdRaw, 10) : NaN;
   const sortByName = searchParams.get("sort") === "name";
 
   if (raw.length < 2) {
@@ -39,13 +41,24 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Supabase no configurado" }, { status: 500 });
   }
 
-  let excluded = new Set<number>();
+  const excluded = new Set<number>();
   if (Number.isInteger(tournamentId) && tournamentId > 0) {
     const { data: rel } = await supabase
       .from("player_tournament")
       .select("player_id")
       .eq("tournament_id", tournamentId);
-    excluded = new Set((rel ?? []).map((r) => r.player_id as number));
+    for (const r of rel ?? []) {
+      excluded.add(r.player_id as number);
+    }
+  }
+  if (Number.isInteger(organizerId) && organizerId > 0) {
+    const { data: rel } = await supabase
+      .from("organizer_players")
+      .select("player_id")
+      .eq("organizer_id", organizerId);
+    for (const r of rel ?? []) {
+      excluded.add(r.player_id as number);
+    }
   }
 
   const pattern = `%${escapeIlike(raw)}%`;

@@ -2,6 +2,7 @@ import { faCalendarDays, faClock, faTag } from "@fortawesome/free-solid-svg-icon
 import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Image from "next/image";
+import Link from "next/link";
 
 import {
   buildOpenTournamentWhatsappMessage,
@@ -42,11 +43,11 @@ export function TournamentCommunityCard({ tournament: t }: TournamentCommunityCa
 
         {/* 2 — Imagen cuadrada | Fecha, Hora, Categoría */}
         <div className="flex flex-row gap-2.5 p-2.5 sm:gap-3 sm:p-3">
-          <div className="relative aspect-square w-[4.25rem] shrink-0 self-start overflow-hidden border-2 border-[var(--color-accent-gold)] bg-[var(--color-surface)] sm:w-24 md:w-28">
-            {t.organizerImageUrl ? (
+          {(() => {
+            const imageInner = t.organizerImageUrl ? (
               <Image
                 src={t.organizerImageUrl}
-                alt={t.name}
+                alt={t.organizerName}
                 fill
                 className="object-cover"
                 sizes="80px, 112px"
@@ -59,8 +60,24 @@ export function TournamentCommunityCard({ tournament: t }: TournamentCommunityCa
               >
                 {t.organizerName.slice(0, 2)}
               </div>
-            )}
-          </div>
+            );
+
+            const wrapperClass =
+              "relative block aspect-square w-[4.25rem] shrink-0 self-start overflow-hidden border-2 border-[var(--color-accent-gold)] bg-[var(--color-surface)] sm:w-24 md:w-28";
+
+            return t.organizerSlug ? (
+              <Link
+                href={`/organizador/${t.organizerSlug}`}
+                aria-label={`Ver perfil de ${t.organizerName}`}
+                title={t.organizerName}
+                className={`${wrapperClass} transition hover:brightness-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent-gold)]`}
+              >
+                {imageInner}
+              </Link>
+            ) : (
+              <div className={wrapperClass}>{imageInner}</div>
+            );
+          })()}
 
           <div className="flex min-h-0 min-w-0 flex-1 flex-col justify-center gap-1.5 text-[10px] sm:text-xs">
             <div className="flex gap-1.5">

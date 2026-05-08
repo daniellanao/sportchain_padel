@@ -13,6 +13,7 @@ export type OpenTournamentPublicItem = {
   category: string | null;
   format: string | null;
   organizerName: string;
+  organizerSlug: string | null;
   organizerImageUrl?: string;
   organizerWhatsapp: string | null;
   venueName: string | null;
@@ -37,7 +38,13 @@ function isPastOpenTournament(endDate: string | null, now: number): boolean {
   return !Number.isNaN(t) && t < now;
 }
 
-type OrganizerRow = { id: number; name: string; image: string | null; whatsapp: string | null };
+type OrganizerRow = {
+  id: number;
+  name: string;
+  slug: string | null;
+  image: string | null;
+  whatsapp: string | null;
+};
 type VenueRow = { id: number; name: string; address: string | null };
 
 /**
@@ -73,7 +80,7 @@ export async function fetchUpcomingOpenTournamentsForPublic(): Promise<OpenTourn
 
   const [orgsResult, venuesResult] = await Promise.all([
     orgIds.length > 0
-      ? supabase.from("organizers").select("id, name, image, whatsapp").in("id", orgIds)
+      ? supabase.from("organizers").select("id, name, slug, image, whatsapp").in("id", orgIds)
       : Promise.resolve({ data: [] as OrganizerRow[] }),
     venueIds.length > 0
       ? supabase.from("venues").select("id, name, address").in("id", venueIds)
@@ -100,6 +107,7 @@ export async function fetchUpcomingOpenTournamentsForPublic(): Promise<OpenTourn
       category: r.category,
       format: r.format,
       organizerName: org?.name ?? `Organizador #${r.organizer_id}`,
+      organizerSlug: org?.slug?.trim() || null,
       organizerImageUrl: normalizeImageUrl(org?.image ?? null),
       organizerWhatsapp: org?.whatsapp?.trim() || null,
       venueName: venue?.name ?? null,
