@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { faStar } from "@fortawesome/free-solid-svg-icons";
+import { faArrowLeft, faStar } from "@fortawesome/free-solid-svg-icons";
 import { faInstagram, faLinkedinIn, faXTwitter } from "@fortawesome/free-brands-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
@@ -89,12 +89,39 @@ export default async function TournamentBySlugPage({ params }: PageProps) {
       <Navbar />
 
       <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6">
-        <Link
-          href="/torneos"
-          className="navbar-text mb-6 inline-block border-2 border-[var(--color-accent-gold)] bg-[var(--color-primary)] px-4 py-2 text-xs uppercase text-white transition hover:brightness-110"
-        >
-          ← Todos los torneos
-        </Link>
+        <div className="mb-6 flex flex-wrap items-center gap-2">
+          <Link
+            href="/torneos"
+            className="navbar-text inline-flex items-center gap-2 border-2 border-[var(--color-accent-gold)] bg-[var(--color-primary)] px-4 py-2 text-xs uppercase text-white transition hover:brightness-110"
+          >
+            <FontAwesomeIcon icon={faArrowLeft} className="h-3 w-3 shrink-0" aria-hidden />
+            Todos los torneos
+          </Link>
+          <Link
+            href={`/torneos/${tournament.slug}/tv`}
+            
+            rel="noopener noreferrer"
+            className="navbar-text inline-flex border-2 border-[var(--color-accent-gold)] bg-[var(--color-surface)] px-3 py-2 text-xs uppercase text-[var(--color-primary)] transition hover:bg-[var(--color-muted)]"
+          >
+            TV
+          </Link>
+          <Link
+            href={`/torneos/${tournament.slug}/tvdark`}
+            
+            rel="noopener noreferrer"
+            className="navbar-text inline-flex border-2 border-[var(--color-accent-gold)] bg-[var(--color-surface)] px-3 py-2 text-xs uppercase text-[var(--color-primary)] transition hover:bg-[var(--color-muted)]"
+          >
+            TV Dark
+          </Link>
+          <Link
+            href={`/torneos/${tournament.slug}/tvdark2`}
+            
+            rel="noopener noreferrer"
+            className="navbar-text inline-flex border-2 border-[var(--color-accent-gold)] bg-[var(--color-surface)] px-3 py-2 text-xs uppercase text-[var(--color-primary)] transition hover:bg-[var(--color-muted)]"
+          >
+            TV Fase 2
+          </Link>
+        </div>
 
         <h2 className="text-xl font-black uppercase text-[var(--color-primary)] sm:text-3xl">
           {tournament.name}
