@@ -107,6 +107,56 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+/*
+ * TV dark (/torneos/[slug]/tvdark) — force dark palette on this route only.
+ * Override both raw tokens and Tailwind @theme aliases (bg-background, etc.).
+ */
+.tvdark {
+  --background: #080d18;
+  --foreground: #eef2f9;
+  --color-primary: #5b9de8;
+  --color-accent-gold: #f0cc6a;
+  --color-muted: #1a2438;
+  --color-surface: #101828;
+  --color-subtle-text: rgba(238, 242, 249, 0.78);
+  --color-background: #080d18;
+  --color-foreground: #eef2f9;
+  color-scheme: dark;
+  background-color: #080d18;
+  color: #eef2f9;
+}
+
+/* System light mode keeps :root light — re-assert dark tokens inside .tvdark */
+@media (prefers-color-scheme: light) {
+  .tvdark {
+    --background: #080d18;
+    --foreground: #eef2f9;
+    --color-primary: #5b9de8;
+    --color-accent-gold: #f0cc6a;
+    --color-muted: #1a2438;
+    --color-surface: #101828;
+    --color-subtle-text: rgba(238, 242, 249, 0.78);
+    --color-background: #080d18;
+    --color-foreground: #eef2f9;
+  }
+}
+
+.tvdark .text-emerald-600 {
+  color: #34d399;
+}
+
+.tvdark .text-red-600 {
+  color: #f87171;
+}
+
+/* Knockout TV phase 2: equal match row + section title height */
+.tvdark2-knockout {
+  --knockout-match-min-height: 2.75rem;
+  --knockout-section-title-height: clamp(1.75rem, 3.5vh, 2.5rem);
+  --knockout-match-font-size: clamp(0.85rem, 1.4vw, 1.2rem);
+  --knockout-score-font-size: clamp(1.05rem, 1.7vw, 1.45rem);
+}
+
 .golden-circle {
   background-color: var(--color-accent-gold);
   color: var(--color-primary);

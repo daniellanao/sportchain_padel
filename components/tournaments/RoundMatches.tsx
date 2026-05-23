@@ -24,6 +24,8 @@ type RoundMatchesProps = {
   emptyRoundLabel?: string;
   /** Tighter spacing and smaller type for kiosk / TV (no scroll). */
   compact?: boolean;
+  /** Table header row background (e.g. per-round color on TV). */
+  headerColor?: string;
 };
 
 function isTeam1Winner(match: RoundMatchRow): boolean {
@@ -34,13 +36,31 @@ function isTeam2Winner(match: RoundMatchRow): boolean {
   return match.finished && match.team2Games > match.team1Games;
 }
 
+function headerTextColor(bg: string): string {
+  const hex = bg.replace("#", "");
+  if (hex.length !== 6) return "#ffffff";
+  const r = parseInt(hex.slice(0, 2), 16);
+  const g = parseInt(hex.slice(2, 4), 16);
+  const b = parseInt(hex.slice(4, 6), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.62 ? "#0b1f3b" : "#ffffff";
+}
+
 export function RoundMatches({
   rounds,
   title = "Partidos por ronda",
   emptyRoundLabel = "Sin partidos en esta ronda.",
   compact = false,
+  headerColor,
 }: RoundMatchesProps) {
   const showSectionTitle = Boolean(title?.trim());
+  const headerStyle = headerColor
+    ? {
+        borderColor: headerColor,
+        backgroundColor: headerColor,
+        color: headerTextColor(headerColor),
+      }
+    : undefined;
 
   return (
     <section className={compact ? "mb-0 min-h-0" : "mb-10"}>
@@ -86,8 +106,15 @@ export function RoundMatches({
             ) : (
               <div
                 className={
-                  compact ? "overflow-hidden border border-[var(--color-primary)]" : "overflow-hidden border-2 border-[var(--color-primary)]"
+                  compact
+                    ? headerColor
+                      ? "overflow-hidden border"
+                      : "overflow-hidden border border-[var(--color-primary)]"
+                    : headerColor
+                      ? "overflow-hidden border-2"
+                      : "overflow-hidden border-2 border-[var(--color-primary)]"
                 }
+                style={headerColor ? { borderColor: headerColor } : undefined}
               >
                 <table
                   className={
@@ -105,10 +132,15 @@ export function RoundMatches({
                   <thead>
                     <tr
                       className={
-                        compact
-                          ? "border-b border-[var(--color-primary)] bg-[var(--color-primary)] text-white"
-                          : "border-b-2 border-[var(--color-primary)] bg-[var(--color-primary)] text-white"
+                        headerColor
+                          ? compact
+                            ? "border-b"
+                            : "border-b-2"
+                          : compact
+                            ? "border-b border-[var(--color-primary)] bg-[var(--color-primary)] text-white"
+                            : "border-b-2 border-[var(--color-primary)] bg-[var(--color-primary)] text-white"
                       }
+                      style={headerStyle}
                     >
                       <th className="px-1 py-1.5 text-center sm:px-2">C</th>
                       <th className="px-1 py-1.5 sm:px-2">Equipo 1</th>

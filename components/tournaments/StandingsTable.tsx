@@ -25,17 +25,21 @@ export function StandingsTable({
   emptyLabel = "Aun no hay standings para este torneo.",
   compact = false,
 }: StandingsTableProps) {
+  const showSectionTitle = Boolean(title?.trim());
+
   return (
     <section className={compact ? "mb-0 min-h-0" : "mb-10"}>
-      <h2
-        className={
-          compact
-            ? "navbar-text mb-0.5 text-[1em] uppercase leading-tight tracking-[0.1em] text-[var(--color-primary)]"
-            : "navbar-text mb-4 text-xs uppercase tracking-[0.12em] text-[var(--color-primary)]"
-        }
-      >
-        {title}
-      </h2>
+      {showSectionTitle ? (
+        <h2
+          className={
+            compact
+              ? "navbar-text mb-0.5 text-[1em] uppercase leading-tight tracking-[0.1em] text-[var(--color-primary)]"
+              : "navbar-text mb-4 text-xs uppercase tracking-[0.12em] text-[var(--color-primary)]"
+          }
+        >
+          {title}
+        </h2>
+      ) : null}
       <div
         className={
           compact
