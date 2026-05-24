@@ -25,7 +25,7 @@ export function Hero() {
           </p>
 
           <h1 className="mb-4 text-center text-3xl font-bold leading-[1.15] tracking-tight text-white sm:text-4xl sm:leading-tight md:text-5xl">
-            Pádel: ranking y torneos
+            Pádel: Ranking y Torneos
           </h1>
 
           <p className="mx-auto max-w-lg text-center text-[15px] leading-relaxed text-white/80 sm:text-base">

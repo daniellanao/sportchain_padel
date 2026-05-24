@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { faStar } from "@fortawesome/free-solid-svg-icons";
+import { faArrowLeft, faStar } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -63,6 +63,15 @@ export default async function OrganizerPublicPage({ params }: PageProps) {
       <Navbar />
 
       <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 sm:px-6">
+        <div className="mb-6">
+          <Link
+            href="/organizadores"
+            className="navbar-text inline-flex items-center gap-2 border-2 border-[var(--color-accent-gold)] bg-[var(--color-primary)] px-4 py-2 text-xs uppercase text-white transition hover:brightness-110"
+          >
+            <FontAwesomeIcon icon={faArrowLeft} className="h-3 w-3 shrink-0" aria-hidden />
+            Organizadores
+          </Link>
+        </div>
         <h1 className="text-2xl font-black uppercase text-[var(--color-primary)] sm:text-3xl">
           {organizer.name}
         </h1>
