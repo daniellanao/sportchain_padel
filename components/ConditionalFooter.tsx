@@ -11,7 +11,8 @@ export function ConditionalFooter() {
     pathname?.includes("/torneos/") &&
     (pathname.endsWith("/tv") ||
       pathname.endsWith("/tvdark") ||
-      pathname.endsWith("/tvdark2"))
+      pathname.endsWith("/tvdark2") ||
+      pathname.endsWith("/tablet"))
   ) {
     return null;
   }

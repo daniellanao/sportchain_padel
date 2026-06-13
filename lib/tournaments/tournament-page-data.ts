@@ -192,8 +192,7 @@ export async function fetchTournamentPageData(slug: string): Promise<TournamentP
           buchholz: row.buchholz,
         }))
         .sort((a, b) => {
-          if (a.points !== b.points) return b.points - a.points;
-          if (a.buchholz !== b.buchholz) return b.buchholz - a.buchholz;
+          if (a.points !== b.points) return b.points - a.points;          
           return b.gamesDifference - a.gamesDifference;
         })
         .map((row, idx) => ({ ...row, rank: idx + 1 }));

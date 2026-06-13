@@ -121,6 +121,13 @@ export default async function TournamentBySlugPage({ params }: PageProps) {
           >
             TV Fase 2
           </Link>
+          <Link
+            href={`/torneos/${tournament.slug}/tablet`}
+            rel="noopener noreferrer"
+            className="navbar-text inline-flex border-2 border-[var(--color-accent-gold)] bg-[var(--color-surface)] px-3 py-2 text-xs uppercase text-[var(--color-primary)] transition hover:bg-[var(--color-muted)]"
+          >
+            Tablet
+          </Link>
         </div>
 
         <h2 className="text-xl font-black uppercase text-[var(--color-primary)] sm:text-3xl">
