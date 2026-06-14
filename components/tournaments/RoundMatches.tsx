@@ -26,6 +26,10 @@ type RoundMatchesProps = {
   compact?: boolean;
   /** Table header row background (e.g. per-round color on TV). */
   headerColor?: string;
+  /** Hide the court (C) column. */
+  hideCourtColumn?: boolean;
+  /** Score column header (default G1-G2). */
+  scoreColumnLabel?: string;
 };
 
 function isTeam1Winner(match: RoundMatchRow): boolean {
@@ -52,6 +56,8 @@ export function RoundMatches({
   emptyRoundLabel = "Sin partidos en esta ronda.",
   compact = false,
   headerColor,
+  hideCourtColumn = false,
+  scoreColumnLabel = "G1-G2",
 }: RoundMatchesProps) {
   const showSectionTitle = Boolean(title?.trim());
   const headerStyle = headerColor
@@ -124,10 +130,20 @@ export function RoundMatches({
                   }
                 >
                   <colgroup>
-                    <col className="w-[10%]" />
-                    <col className="w-[38%]" />
-                    <col className="w-[14%]" />
-                    <col className="w-[38%]" />
+                    {hideCourtColumn ? (
+                      <>
+                        <col className="w-[42%]" />
+                        <col className="w-[16%]" />
+                        <col className="w-[42%]" />
+                      </>
+                    ) : (
+                      <>
+                        <col className="w-[10%]" />
+                        <col className="w-[38%]" />
+                        <col className="w-[14%]" />
+                        <col className="w-[38%]" />
+                      </>
+                    )}
                   </colgroup>
                   <thead>
                     <tr
@@ -142,9 +158,11 @@ export function RoundMatches({
                       }
                       style={headerStyle}
                     >
-                      <th className="px-1 py-1.5 text-center sm:px-2">C</th>
+                      {hideCourtColumn ? null : (
+                        <th className="px-1 py-1.5 text-center sm:px-2">C</th>
+                      )}
                       <th className="px-1 py-1.5 sm:px-2">Equipo 1</th>
-                      <th className="px-1 py-1.5 text-center sm:px-2">G1-G2</th>
+                      <th className="px-1 py-1.5 text-center sm:px-2">{scoreColumnLabel}</th>
                       <th className="px-1 py-1.5 sm:px-2">Equipo 2</th>
                     </tr>
                   </thead>
@@ -158,9 +176,11 @@ export function RoundMatches({
                             : "border-b border-[var(--color-muted)] bg-[var(--color-surface)]"
                         }
                       >
-                        <td className="px-1 py-1.5 text-center font-mono tabular-nums text-[var(--color-subtle-text)] sm:px-2">
-                          {m.court != null ? `C${m.court}` : "—"}
-                        </td>
+                        {hideCourtColumn ? null : (
+                          <td className="px-1 py-1.5 text-center font-mono tabular-nums text-[var(--color-subtle-text)] sm:px-2">
+                            {m.court != null ? `C${m.court}` : "—"}
+                          </td>
+                        )}
                         <td className="truncate px-1 py-1.5 font-medium sm:px-2">
                           <span className="inline-flex items-center gap-0.5">
                             {isTeam1Winner(m) ? (

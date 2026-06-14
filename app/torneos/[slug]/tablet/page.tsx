@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { RoundMatches, type RoundMatchesRound } from "@/components/tournaments/RoundMatches";
+import { RoundMatches, type RoundMatchRow, type RoundMatchesRound } from "@/components/tournaments/RoundMatches";
 import { StandingsTable } from "@/components/tournaments/StandingsTable";
 import { formatTournamentFormatLabel } from "@/data/tournaments";
 import { absoluteUrl } from "@/lib/site-config";
@@ -13,6 +13,17 @@ type PageProps = {
 };
 
 export const revalidate = 60;
+
+const roundTextClass =
+  "text-[length:clamp(0.85rem,1.55vw,1.15rem)] leading-snug [&_tbody_td]:py-1 [&_thead_th]:py-1 [&_tr]:leading-snug";
+const standingsTextClass =
+  "text-[length:clamp(0.9rem,1.75vw,1.3rem)] leading-snug [&_tbody_td]:py-1 [&_thead_th]:py-1 [&_tr]:leading-snug";
+const tabletRoundMatchProps = {
+  title: "",
+  compact: true,
+  hideCourtColumn: true,
+  scoreColumnLabel: "Res.",
+} as const;
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
@@ -38,14 +49,28 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-function roundByNumber(rounds: RoundMatchesRound[], n: number): RoundMatchesRound {
-  return (
-    rounds.find((r) => r.roundNumber === n) ?? {
-      roundNumber: n,
-      label: `Ronda ${n}`,
-      matches: [],
-    }
-  );
+function roundByNumber(
+  rounds: RoundMatchesRound[],
+  n: number,
+  label?: string,
+): RoundMatchesRound {
+  const found = rounds.find((r) => r.roundNumber === n);
+  if (found) return { ...found, label: label ?? found.label };
+  return {
+    roundNumber: n,
+    label: label ?? `Ronda ${n}`,
+    matches: [],
+  };
+}
+
+/** Ronda 5: primer partido = final, segundo = 3er puesto (si existe). */
+function splitFinalRound(matches: RoundMatchRow[]): {
+  final: RoundMatchRow[];
+  third: RoundMatchRow[];
+} {
+  if (matches.length === 0) return { final: [], third: [] };
+  if (matches.length === 1) return { final: [matches[0]], third: [] };
+  return { final: [matches[0]], third: matches.slice(1) };
 }
 
 export default async function TournamentTabletPage({ params }: PageProps) {
@@ -59,19 +84,52 @@ export default async function TournamentTabletPage({ params }: PageProps) {
   const round1 = roundByNumber(roundMatchesRounds, 1);
   const round2 = roundByNumber(roundMatchesRounds, 2);
   const round3 = roundByNumber(roundMatchesRounds, 3);
+  const semis = roundByNumber(roundMatchesRounds, 4, "Semifinales");
+  const finalsRound = roundByNumber(roundMatchesRounds, 5, "Final");
+  const { final: finalMatches, third: thirdMatches } = splitFinalRound(finalsRound.matches);
+  const finalRound: RoundMatchesRound = {
+    roundNumber: 5,
+    label: "Final",
+    matches: finalMatches,
+  };
+  const thirdRound: RoundMatchesRound = {
+    roundNumber: 5,
+    label: "3er puesto",
+    matches: thirdMatches,
+  };
 
   return (
-    <div className="flex h-full min-h-0 w-full flex-1 gap-2 overflow-hidden bg-[var(--background)] px-2 py-2 text-[var(--foreground)] sm:gap-3 sm:px-3 sm:py-3">
-      <div className="flex w-[60%] shrink-0 flex-col overflow-hidden">
-        <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden text-[length:clamp(0.9rem,1.75vw,1.3rem)] leading-snug [&_tbody_td]:py-1 [&_thead_th]:py-1 [&_tr]:leading-snug">
-          <StandingsTable rows={standingsRows} title="" compact />
+    <div className="grid h-full min-h-0 w-full flex-1 grid-cols-3 gap-x-2 overflow-hidden bg-[var(--background)] px-2 py-2 text-[var(--foreground)] sm:gap-x-3 sm:px-3 sm:py-3">
+      <div className="col-start-1 flex min-h-0 min-w-0 flex-col gap-2 overflow-hidden sm:gap-3">
+        <div className={`min-h-0 flex-1 overflow-hidden ${roundTextClass}`}>
+          <RoundMatches rounds={[round1]} {...tabletRoundMatchProps} headerColor="#dc2626" />
+        </div>
+        <div className={`min-h-0 flex-1 overflow-hidden ${roundTextClass}`}>
+          <RoundMatches rounds={[round2]} {...tabletRoundMatchProps} headerColor="#2563eb" />
+        </div>
+        <div className={`min-h-0 flex-1 overflow-hidden ${roundTextClass}`}>
+          <RoundMatches rounds={[round3]} {...tabletRoundMatchProps} headerColor="#eab308" />
         </div>
       </div>
 
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-2 overflow-y-auto overflow-x-hidden text-[length:clamp(0.85rem,1.55vw,1.15rem)] leading-snug sm:gap-3 [&_tbody_td]:py-1 [&_thead_th]:py-1 [&_tr]:leading-snug">
-        <RoundMatches rounds={[round1]} title="" compact headerColor="#dc2626" />
-        <RoundMatches rounds={[round2]} title="" compact headerColor="#2563eb" />
-        <RoundMatches rounds={[round3]} title="" compact headerColor="#eab308" />
+      <div className="col-span-2 col-start-2 flex min-h-0 min-w-0 flex-col gap-1 overflow-hidden sm:gap-1.5">
+        <div className={`min-h-0 shrink-0 overflow-y-auto overflow-x-hidden ${standingsTextClass}`}>
+          <StandingsTable rows={standingsRows} title="" compact />
+        </div>
+
+        <div className="grid min-h-0 flex-1 grid-cols-2 gap-1 overflow-hidden sm:gap-1.5">
+          <div className={`min-h-0 min-w-0 overflow-hidden ${roundTextClass}`}>
+            <RoundMatches rounds={[semis]} {...tabletRoundMatchProps} headerColor="#16a34a" />
+          </div>
+          <div className="flex min-h-0 min-w-0 flex-col gap-1 overflow-hidden sm:gap-1.5">
+            <div className={`min-h-0 flex-1 overflow-hidden ${roundTextClass}`}>
+              <RoundMatches rounds={[finalRound]} {...tabletRoundMatchProps} headerColor="#ca8a04" />
+            </div>
+            <div className={`min-h-0 flex-1 overflow-hidden ${roundTextClass}`}>
+              <RoundMatches rounds={[thirdRound]} {...tabletRoundMatchProps} headerColor="#d97706" />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
