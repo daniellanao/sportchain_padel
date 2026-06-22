@@ -29,7 +29,7 @@ function sidePlayersLabel(
     const pid = Number(r.player_id);
     return labelById.get(pid) ?? `#${pid}`;
   });
-  return parts.length ? parts.join(" · ") : "—";
+  return parts.length ? parts.join(" · ") : "-";
 }
 
 /**
@@ -61,13 +61,26 @@ export async function fetchRatingMatchesListFromSupabase(): Promise<RatingMatche
 
   const matchIds = matches.map((m) => Number((m as { id: unknown }).id)).filter((n) => Number.isFinite(n));
 
-  const { data: rpmData, error: rpmErr } = await supabase
-    .from("rating_match_players")
-    .select("rating_match_id, player_id, side, role, is_winner")
-    .in("rating_match_id", matchIds);
+  // PostgREST devuelve como máximo 1000 filas por petición; 260 partidos × 4 jugadores = 1040.
+  const rpmData: Array<{
+    rating_match_id: unknown;
+    player_id: unknown;
+    side: unknown;
+    role: unknown;
+    is_winner: unknown;
+  }> = [];
+  const MATCH_ID_CHUNK = 80;
+  for (let i = 0; i < matchIds.length; i += MATCH_ID_CHUNK) {
+    const chunk = matchIds.slice(i, i + MATCH_ID_CHUNK);
+    const { data, error: rpmErr } = await supabase
+      .from("rating_match_players")
+      .select("rating_match_id, player_id, side, role, is_winner")
+      .in("rating_match_id", chunk);
 
-  if (rpmErr) {
-    return { ok: false, error: rpmErr.message, matches: [] };
+    if (rpmErr) {
+      return { ok: false, error: rpmErr.message, matches: [] };
+    }
+    if (data) rpmData.push(...data);
   }
 
   const allPlayerIds = new Set<number>();
@@ -97,10 +110,14 @@ export async function fetchRatingMatchesListFromSupabase(): Promise<RatingMatche
     rpmByMatch.set(mid, list);
   }
 
-  const { data: playerRows } =
-    allPlayerIds.size > 0
-      ? await supabase.from("players").select("id, name, lastname").in("id", [...allPlayerIds])
-      : { data: [] as { id: number; name: string; lastname: string }[] | null };
+  const playerRows: { id: number; name: string; lastname: string }[] = [];
+  const playerIdList = [...allPlayerIds];
+  const PLAYER_ID_CHUNK = 200;
+  for (let i = 0; i < playerIdList.length; i += PLAYER_ID_CHUNK) {
+    const chunk = playerIdList.slice(i, i + PLAYER_ID_CHUNK);
+    const { data } = await supabase.from("players").select("id, name, lastname").in("id", chunk);
+    if (data) playerRows.push(...data);
+  }
 
   const labelById = new Map<number, string>();
   for (const p of playerRows ?? []) {

@@ -119,13 +119,22 @@ async function fetchPlayerRatingHistoryFromSupabase(playerId: number): Promise<R
     ),
   ];
 
-  const [{ data: matchRows }, { data: rpmRows }] = await Promise.all([
-    supabase.from("rating_matches").select("id, played_at").in("id", matchIds),
-    supabase
-      .from("rating_match_players")
-      .select("rating_match_id, side, role, is_winner, player_id")
-      .in("rating_match_id", matchIds),
-  ]);
+  // PostgREST devuelve como máximo 1000 filas por petición (p. ej. 250+ partidos × 4 jugadores).
+  const matchRows: Array<{ id: unknown; played_at: string | null }> = [];
+  const rpmRows: RpmRow[] = [];
+  const MATCH_ID_CHUNK = 80;
+  for (let i = 0; i < matchIds.length; i += MATCH_ID_CHUNK) {
+    const chunk = matchIds.slice(i, i + MATCH_ID_CHUNK);
+    const [{ data: matchesChunk }, { data: rpmChunk }] = await Promise.all([
+      supabase.from("rating_matches").select("id, played_at").in("id", chunk),
+      supabase
+        .from("rating_match_players")
+        .select("rating_match_id, side, role, is_winner, player_id")
+        .in("rating_match_id", chunk),
+    ]);
+    if (matchesChunk) matchRows.push(...matchesChunk);
+    if (rpmChunk) rpmRows.push(...(rpmChunk as RpmRow[]));
+  }
 
   const playedAtByMatchId = new Map<number, string>();
   for (const m of matchRows ?? []) {
@@ -148,10 +157,14 @@ async function fetchPlayerRatingHistoryFromSupabase(playerId: number): Promise<R
     allPlayerIds.add(Number((row as RpmRow).player_id));
   }
 
-  const { data: playerRows } =
-    allPlayerIds.size > 0
-      ? await supabase.from("players").select("id, name, lastname").in("id", [...allPlayerIds])
-      : { data: [] as { id: number; name: string; lastname: string }[] | null };
+  const playerRows: { id: number; name: string; lastname: string }[] = [];
+  const playerIdList = [...allPlayerIds];
+  const PLAYER_ID_CHUNK = 200;
+  for (let i = 0; i < playerIdList.length; i += PLAYER_ID_CHUNK) {
+    const chunk = playerIdList.slice(i, i + PLAYER_ID_CHUNK);
+    const { data } = await supabase.from("players").select("id, name, lastname").in("id", chunk);
+    if (data) playerRows.push(...data);
+  }
 
   const labelById = new Map<number, string>();
   for (const p of playerRows ?? []) {
