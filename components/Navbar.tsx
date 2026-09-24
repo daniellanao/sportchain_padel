@@ -59,6 +59,9 @@ export function Navbar() {
           <Link href="/torneos" className={navLinkClass}>
             Torneos
           </Link>
+          <Link href="/clubes" className={navLinkClass}>
+            Clubes
+          </Link>
           <Link href="/organizadores" className={navLinkClass}>
             Orgs
           </Link>
@@ -105,6 +108,9 @@ export function Navbar() {
           </Link>
           <Link href="/torneos" className={mobileLinkClass} onClick={() => setOpen(false)}>
             Torneos
+          </Link>
+          <Link href="/clubes" className={mobileLinkClass} onClick={() => setOpen(false)}>
+            Clubes
           </Link>
           <Link href="/organizadores" className={mobileLinkClass} onClick={() => setOpen(false)}>
             Orgs
