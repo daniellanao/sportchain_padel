@@ -1,32 +1,30 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useEffect, useId, useState } from "react";
 
-const navLinkClass =
-  "navbar-text border-2 border-[var(--color-accent-gold)] bg-[var(--color-primary)] px-3 py-2 text-xs uppercase text-white transition hover:brightness-110 sm:px-4";
+const NAV_ITEMS = [
+  { href: "/", label: "Inicio" },
+  { href: "/clubes", label: "Clubes" },
+  { href: "/torneos", label: "Torneos" },
+  { href: "/ranking", label: "Ranking" },
+] as const;
 
-const mobileLinkClass =
-  "navbar-text block w-full border-2 border-[var(--color-accent-gold)] bg-[var(--color-primary)] px-4 py-3 text-center text-xs uppercase text-white transition hover:brightness-110 active:brightness-95";
-
-const loginDesktopClass =
-  "navbar-text btn-gold border-2 border-[var(--color-accent-gold)] px-3 py-2 text-xs uppercase sm:px-4";
-
-const loginMobileClass =
-  "navbar-text btn-gold w-full border-2 border-[var(--color-accent-gold)] px-4 py-3 text-xs uppercase";
+function isActivePath(pathname: string, href: string) {
+  if (href === "/") return pathname === "/";
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
 
 export function Navbar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const menuId = useId();
-  
 
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
 
-  
   useEffect(() => {
     if (open) {
       document.body.style.overflow = "hidden";
@@ -39,42 +37,47 @@ export function Navbar() {
   }, [open]);
 
   return (
-    <header className="relative z-50 border-b-4 border-[var(--color-primary)] bg-[rgba(11,31,59,0.95)] px-4 py-3 shadow-[0_6px_0_rgba(0,0,0,0.2)] sm:px-5 sm:py-4">
-      <nav className="mx-auto flex w-full max-w-6xl items-center justify-between gap-3" aria-label="Main">
-        <Link
-          href="/"
-          className="logo min-w-0 max-w-[min(100%,15rem)] truncate text-xs leading-tight text-[var(--color-accent-gold)] sm:max-w-[min(100%,20rem)] sm:text-sm md:max-w-none md:text-base"
-        >
-          Padel Sportchain
+    <header className="sticky top-0 z-50 border-b border-[#12305D]/10 bg-white/95 backdrop-blur-sm">
+      <nav
+        className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-4 px-4 sm:h-16 sm:px-6"
+        aria-label="Principal"
+      >
+        <Link href="/" className="logo shrink-0 text-[0.8125rem] leading-none text-[#12305D] sm:text-sm">
+          SportChain <span className="font-semibold tracking-[0.06em] text-[#12305D]/65">Padel</span>
         </Link>
 
-        {/* Desktop navigation */}
-        <div className="hidden items-center gap-2 md:flex md:gap-3">
-          <Link href="/" className={navLinkClass}>
-            Inicio
-          </Link>
-          <Link href="/ranking" className={navLinkClass}>
-            Ranking
-          </Link>
-          <Link href="/torneos" className={navLinkClass}>
-            Torneos
-          </Link>
-          <Link href="/clubes" className={navLinkClass}>
-            Clubes
-          </Link>
-          <Link href="/organizadores" className={navLinkClass}>
-            Orgs
-          </Link>
-        </div>
+        <ul className="hidden items-center gap-1 md:flex">
+          {NAV_ITEMS.map((item) => {
+            const active = isActivePath(pathname, item.href);
+            return (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  className={`relative px-3 py-2 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] transition-colors ${
+                    active ? "text-[#12305D]" : "text-[#12305D]/55 hover:text-[#12305D]"
+                  }`}
+                  aria-current={active ? "page" : undefined}
+                >
+                  {item.label}
+                  {active ? (
+                    <span
+                      className="absolute inset-x-3 -bottom-[calc(0.5rem+1px)] h-0.5 bg-[#12305D]"
+                      aria-hidden
+                    />
+                  ) : null}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
 
-        {/* Mobile menu button */}
         <button
           type="button"
-          className="flex h-11 w-11 shrink-0 items-center justify-center border-2 border-[var(--color-accent-gold)] bg-[var(--color-primary)] text-white md:hidden"
+          className="flex h-10 w-10 shrink-0 items-center justify-center text-[#12305D] md:hidden"
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
           aria-controls={menuId}
-          aria-label={open ? "Close menu" : "Open menu"}
+          aria-label={open ? "Cerrar menú" : "Abrir menú"}
         >
           {open ? (
             <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden>
@@ -91,31 +94,34 @@ export function Navbar() {
         </button>
       </nav>
 
-      {/* Mobile slide-down panel */}
       <div
         id={menuId}
-        className={`mx-auto w-full max-w-6xl overflow-hidden transition-[max-height] duration-200 ease-out md:hidden ${
-          open ? "max-h-[min(80vh,28rem)] border-t-2 border-[var(--color-accent-gold)]/50" : "max-h-0"
+        className={`overflow-hidden border-t border-[#12305D]/10 bg-white transition-[max-height] duration-200 ease-out md:hidden ${
+          open ? "max-h-72" : "max-h-0 border-t-0"
         }`}
         aria-hidden={!open}
       >
-        <div className="flex flex-col gap-2 py-3">
-          <Link href="/" className={mobileLinkClass} onClick={() => setOpen(false)}>
-            Inicio
-          </Link>
-          <Link href="/ranking" className={mobileLinkClass} onClick={() => setOpen(false)}>
-            Ranking
-          </Link>
-          <Link href="/torneos" className={mobileLinkClass} onClick={() => setOpen(false)}>
-            Torneos
-          </Link>
-          <Link href="/clubes" className={mobileLinkClass} onClick={() => setOpen(false)}>
-            Clubes
-          </Link>
-          <Link href="/organizadores" className={mobileLinkClass} onClick={() => setOpen(false)}>
-            Orgs
-          </Link>
-        </div>
+        <ul className="mx-auto flex w-full max-w-6xl flex-col px-4 py-2 sm:px-6">
+          {NAV_ITEMS.map((item) => {
+            const active = isActivePath(pathname, item.href);
+            return (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  onClick={() => setOpen(false)}
+                  className={`block border-l-2 px-3 py-3 text-xs font-semibold uppercase tracking-[0.14em] transition-colors ${
+                    active
+                      ? "border-[#12305D] text-[#12305D]"
+                      : "border-transparent text-[#12305D]/60 hover:text-[#12305D]"
+                  }`}
+                  aria-current={active ? "page" : undefined}
+                >
+                  {item.label}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
       </div>
     </header>
   );

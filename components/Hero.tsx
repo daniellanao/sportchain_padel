@@ -1,51 +1,59 @@
+import Image from "next/image";
 import Link from "next/link";
 
-const HERO_BACKGROUND_URL = "/sportchain_padel_background.png";
+const HERO_IMAGE = "/sportchain_torneo_padel.jpg";
 
 /**
- * Hero: full-viewport intro with background image.
- * Glass panel, tight typography, soft overlay for contrast.
+ * Full-bleed hero: brand, headline, support line, CTAs over court photo.
  */
 export function Hero() {
   return (
     <section
       id="home"
-      className="relative flex min-h-[calc(100vh-84px)] flex-col items-center justify-center px-5 py-16 sm:py-24"
-      style={{
-        backgroundImage: `linear-gradient(165deg, rgba(11, 31, 59, 0.78) 0%, rgba(11, 31, 59, 0.55) 45%, rgba(11, 31, 59, 0.72) 100%), url('${HERO_BACKGROUND_URL}')`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        imageRendering: "pixelated",
-      }}
+      className="relative flex min-h-[min(88vh,52rem)] flex-col justify-end overflow-hidden sm:min-h-[min(90vh,56rem)]"
     >
-      <div className="relative w-full max-w-2xl">
-        <div className="rounded-2xl border border-white/10 bg-[rgba(11,31,59,0.45)] p-8 shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur-md sm:p-12">
-          <p className="mb-3 text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--color-accent-gold)] sm:text-xs">
-            Sportchain
-          </p>
+      <Image
+        src={HERO_IMAGE}
+        alt="Jugadores de pádel en un torneo SportChain"
+        fill
+        priority
+        sizes="100vw"
+        className="object-cover object-center animate-[hero-zoom_18s_ease-out_forwards]"
+      />
 
-          <h1 className="mb-4 text-center text-3xl font-bold leading-[1.15] tracking-tight text-white sm:text-4xl sm:leading-tight md:text-5xl">
-            Pádel: Ranking y Torneos
-          </h1>
+      {/* 20% navy veil + soft bottom fade for text */}
+      <div className="absolute inset-0 bg-[#12305D]/20" aria-hidden />
+      <div
+        className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-black/10"
+        aria-hidden
+      />
 
-          <p className="mx-auto max-w-lg text-center text-[15px] leading-relaxed text-white/80 sm:text-base">
-            Consulta el ranking general, resultados y torneos para seguir sumando puntos.
-          </p>
+      <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-14 pt-28 sm:px-6 sm:pb-20 sm:pt-32">
+        <p className="logo mb-5 text-sm text-white animate-[hero-fade_0.7s_ease-out_both] sm:text-base">
+          SportChain <span className="font-semibold tracking-[0.06em] text-white/70">Padel</span>
+        </p>
 
-          <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:justify-center sm:gap-4">
-            <Link
-              href="/ranking"
-              className="inline-flex min-h-12 items-center justify-center rounded-xl bg-[var(--color-accent-gold)] px-8 text-sm font-semibold text-[var(--color-primary)] shadow-sm transition hover:brightness-105 active:scale-[0.98] sm:min-w-[11rem]"
-            >
-              Ver ranking
-            </Link>
-            <Link
-              href="/torneos"
-              className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/25 bg-white/5 px-8 text-sm font-semibold text-white backdrop-blur-sm transition hover:border-white/40 hover:bg-white/10 active:scale-[0.98] sm:min-w-[11rem]"
-            >
-              Ver torneos
-            </Link>
-          </div>
+        <h1 className="max-w-3xl text-3xl font-extrabold leading-[1.12] tracking-tight text-[#E3C273] animate-[hero-fade_0.7s_ease-out_0.08s_both] sm:text-4xl md:text-5xl md:leading-[1.1]">
+          Encuentra canchas de pádel y torneos para jugar
+        </h1>
+
+        <p className="mt-4 max-w-xl text-base leading-relaxed text-white/85 animate-[hero-fade_0.7s_ease-out_0.16s_both] sm:text-lg">
+          Descubre clubes, participa en torneos y mejora tu ranking.
+        </p>
+
+        <div className="mt-8 flex flex-col gap-3 animate-[hero-fade_0.7s_ease-out_0.24s_both] sm:mt-10 sm:flex-row sm:items-center sm:gap-4">
+          <Link
+            href="/clubes"
+            className="inline-flex min-h-12 items-center justify-center bg-white px-8 text-[0.6875rem] font-bold uppercase tracking-[0.14em] text-[#12305D] transition hover:bg-white/90 active:scale-[0.99] sm:min-w-[10.5rem]"
+          >
+            Ver clubes
+          </Link>
+          <Link
+            href="/torneos"
+            className="inline-flex min-h-12 items-center justify-center border border-white/50 bg-transparent px-8 text-[0.6875rem] font-bold uppercase tracking-[0.14em] text-white transition hover:border-white hover:bg-white/10 active:scale-[0.99] sm:min-w-[10.5rem]"
+          >
+            Ver torneos
+          </Link>
         </div>
       </div>
     </section>
