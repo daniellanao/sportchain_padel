@@ -49,6 +49,23 @@ export async function fetchPlayersListFromSupabase(): Promise<PlayersListResult>
   return { ok: true, players: (data ?? []) as PlayerDbRow[] };
 }
 
+/**
+ * Overall ranking position for a rating: players with a higher rating + 1
+ * (ties share the position, same as the `/ranking` table).
+ */
+export async function fetchRankingPositionFromSupabase(rating: number): Promise<number | null> {
+  const supabase = createSupabaseServerClient();
+  if (!supabase) return null;
+
+  const { count, error } = await supabase
+    .from("players")
+    .select("id", { count: "exact", head: true })
+    .gt("rating", rating);
+
+  if (error || count == null) return null;
+  return count + 1;
+}
+
 export async function fetchPlayerByIdFromSupabase(id: string): Promise<PlayerDbRow | null> {
   const supabase = createSupabaseServerClient();
   if (!supabase) return null;

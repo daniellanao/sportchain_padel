@@ -45,21 +45,29 @@ export default async function RankingPage() {
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
 
-      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 sm:px-6">
-        <h1 className="text-2xl font-black uppercase text-[var(--color-primary)] sm:text-3xl">
-          Ranking
-        </h1>
-        <p className="mt-2 text-sm text-[color:var(--color-subtle-text)]">
+      <section className="flex h-[30svh] min-h-[13rem] items-center justify-center bg-gradient-to-b from-black via-neutral-950 to-neutral-800 px-4 text-center sm:px-6">
+        <div className="mx-auto max-w-3xl">
+          <p className="text-[0.6875rem] font-bold uppercase tracking-[0.2em] text-white/60 sm:text-xs">
+            Ranking ELO · Pádel
+          </p>
+          <h1 className="mt-2 text-3xl font-extrabold leading-tight tracking-tight text-[#E3C273] sm:text-4xl md:text-5xl">
+            Sube en el ranking
+          </h1>
+          <p className="mx-auto mt-3 max-w-xl text-sm leading-snug text-white/80 sm:text-base">
+            Cada partido cuenta: compite en torneos, suma puntos ELO y mide tu nivel frente a otros jugadores.
+          </p>
           <Link
             href="/ranking/calculo"
-            className="font-medium text-[var(--color-primary)] underline-offset-2 hover:underline"
+            className="mt-3 inline-block text-xs font-bold uppercase tracking-[0.14em] text-white underline decoration-white/40 underline-offset-4 transition hover:decoration-white"
           >
             ¿Cómo se calcula?
           </Link>
-        </p>
+        </div>
+      </section>
 
+      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 sm:px-6">
         {!result.ok ? (
-          <p className="mt-4 rounded border-2 border-amber-600/60 bg-amber-950/20 px-4 py-3 text-sm text-amber-100">
+          <p className="rounded border-2 border-amber-600/60 bg-amber-950/20 px-4 py-3 text-sm text-amber-100">
             {result.error}
           </p>
         ) : null}

@@ -3,8 +3,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Navbar } from "@/components/Navbar";
+import { EloEvolutionChart, type EloPoint } from "@/components/ranking/EloEvolutionChart";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { fetchPlayerByIdFromSupabase } from "@/lib/ranking/supabase-players";
+import { fetchPlayerByIdFromSupabase, fetchRankingPositionFromSupabase } from "@/lib/ranking/supabase-players";
 import { absoluteUrl } from "@/lib/site-config";
 
 type PageProps = {
@@ -52,7 +53,7 @@ function PlayerLink({ id, label }: { id: number; label: string }) {
   return (
     <Link
       href={`/ranking/${id}`}
-      className="font-medium text-[var(--color-primary)] underline-offset-2 hover:underline"
+      className="font-semibold text-black underline-offset-2 hover:underline"
     >
       {label}
     </Link>
@@ -245,78 +246,130 @@ export default async function PlayerHistoryPage({ params }: PageProps) {
   }
 
   const playerId = Number(id);
-  const matches = Number.isFinite(playerId) ? await fetchPlayerRatingHistoryFromSupabase(playerId) : [];
+  const [matches, position] = await Promise.all([
+    Number.isFinite(playerId) ? fetchPlayerRatingHistoryFromSupabase(playerId) : Promise.resolve([]),
+    fetchRankingPositionFromSupabase(row.rating),
+  ]);
   const name = `${row.name} ${row.lastname}`;
+
+  const wins = matches.filter((m) => m.result === "win").length;
+  const decided = matches.filter((m) => m.result != null).length;
+  const winRate = decided > 0 ? Math.round((wins / decided) * 100) : null;
+  const tournamentsWon = row.stars ?? 0;
+
+  const chronological = [...matches].reverse();
+  const eloPoints: EloPoint[] =
+    chronological.length > 0
+      ? [
+          { date: chronological[0].playedAt, elo: chronological[0].ratingBefore },
+          ...chronological.map((m) => ({ date: m.playedAt, elo: m.ratingAfter })),
+        ]
+      : [];
+  const eloValues = eloPoints.map((p) => p.elo);
+  const peakElo = eloValues.length > 0 ? Math.max(...eloValues) : null;
+  const lowestElo = eloValues.length > 0 ? Math.min(...eloValues) : null;
+
+  const stats: Array<{ label: string; value: string; highlight?: boolean }> = [
+    { label: "ELO", value: String(row.rating), highlight: true },
+    {
+      label: "Posición",
+      value: position != null ? `#${position}` : "—",
+      highlight: position === 1,
+    },
+    { label: "Partidos", value: String(row.matches_played) },
+    { label: "Victorias", value: String(wins) },
+    { label: "% Victorias", value: winRate != null ? `${winRate}%` : "—" },
+    { label: "Torneos ganados", value: String(tournamentsWon) },
+  ];
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
 
-      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6">
-        <Link
-          href="/ranking"
-          className="navbar-text mb-6 inline-block border-2 border-[var(--color-accent-gold)] bg-[var(--color-primary)] px-4 py-2 text-xs uppercase text-white transition hover:brightness-110"
-        >
-          ← Volver al ranking
-        </Link>
+      <section className="bg-gradient-to-b from-black via-neutral-950 to-neutral-800 px-4 sm:px-6">
+        <div className="mx-auto w-full max-w-5xl py-8 sm:py-10">
+          <Link
+            href="/ranking"
+            className="text-xs font-bold uppercase tracking-[0.14em] text-white/60 transition hover:text-white"
+          >
+            ← Ranking
+          </Link>
 
-        <header className="mb-8 border-4 border-[var(--color-accent-gold)] bg-[var(--color-surface)] p-5 shadow-[6px_6px_0_rgba(0,0,0,0.15)] sm:p-6">
-          <h1 className="text-2xl font-black uppercase text-[var(--color-primary)] sm:text-3xl">
-            {name}
-          </h1>
-          <dl className="mt-4 flex flex-wrap gap-6 text-sm">
-            <div>
-              <dt className="navbar-text text-[10px] uppercase text-[var(--color-subtle-text)]">
-                ELO actual (individual)
-              </dt>
-              <dd className="navbar-text text-lg tabular-nums text-[var(--color-primary)]">
-                {row.rating}
-              </dd>
-            </div>
-            <div>
-              <dt className="navbar-text text-[10px] uppercase text-[var(--color-subtle-text)]">
-                Partidos jugados
-              </dt>
-              <dd className="font-medium tabular-nums">{row.matches_played}</dd>
-            </div>
-            <div>
-              <dt className="navbar-text text-[10px] uppercase text-[var(--color-subtle-text)]">
-                Partidos en historial
-              </dt>
-              <dd className="font-medium tabular-nums">{matches.length}</dd>
-            </div>
+          <div className="mt-6 text-center">
+            <p className="text-[0.6875rem] font-bold uppercase tracking-[0.2em] text-white/60 sm:text-xs">
+              Jugador
+            </p>
+            <h1 className="mt-2 text-3xl font-extrabold uppercase leading-tight tracking-tight text-[#E3C273] sm:text-4xl md:text-5xl">
+              {name}
+            </h1>
+          </div>
+
+          <dl className="mt-8 grid grid-cols-2 gap-px overflow-hidden rounded-lg bg-white/10 sm:grid-cols-3 lg:grid-cols-6">
+            {stats.map((s) => (
+              <div key={s.label} className="bg-black/40 px-3 py-4 text-center">
+                <dt className="text-[0.625rem] font-bold uppercase tracking-[0.14em] text-white/60">{s.label}</dt>
+                <dd
+                  className={`mt-1 text-2xl font-extrabold tabular-nums sm:text-3xl ${
+                    s.highlight ? "text-[#E3C273]" : "text-white"
+                  }`}
+                >
+                  {s.value}
+                </dd>
+              </div>
+            ))}
           </dl>
-        </header>
+        </div>
+      </section>
+
+      <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 sm:px-6">
+        <section className="mb-10 rounded-lg border border-black/10 bg-[var(--color-surface)] p-4 shadow-sm sm:p-6">
+          <div className="mb-5 flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
+            <h2 className="text-lg font-extrabold uppercase tracking-tight text-black">Evolución del ELO</h2>
+            {peakElo != null && lowestElo != null ? (
+              <dl className="flex gap-5 text-xs">
+                <div className="flex items-baseline gap-1.5">
+                  <dt className="font-bold uppercase tracking-[0.12em] text-[var(--color-subtle-text)]">Máx.</dt>
+                  <dd className="text-base font-extrabold tabular-nums text-black">{peakElo}</dd>
+                </div>
+                <div className="flex items-baseline gap-1.5">
+                  <dt className="font-bold uppercase tracking-[0.12em] text-[var(--color-subtle-text)]">Mín.</dt>
+                  <dd className="text-base font-extrabold tabular-nums text-black">{lowestElo}</dd>
+                </div>
+              </dl>
+            ) : null}
+          </div>
+          <EloEvolutionChart points={eloPoints} />
+        </section>
 
         <section>
-          <h2 className="navbar-text mb-4 text-xs uppercase tracking-[0.12em] text-[var(--color-primary)]">
-            Historial de partidos (parejas)
-          </h2>
+          <h2 className="mb-4 text-lg font-extrabold uppercase tracking-tight text-black">Historial de partidos</h2>
           {matches.length === 0 ? (
             <p className="text-sm text-[var(--color-subtle-text)]">
               Todavía no hay partidos registrados para este jugador.
             </p>
           ) : (
-            <div className="overflow-x-auto border-4 border-[var(--color-primary)] shadow-[6px_6px_0_rgba(0,0,0,0.2)]">
-              <table className="w-full min-w-[1100px] border-collapse text-left text-sm">
+            <div className="overflow-x-auto rounded-lg border border-black/10 shadow-sm">
+              <table className="w-full min-w-[760px] border-collapse text-left text-sm">
                 <thead>
-                  <tr className="border-b-4 border-[var(--color-primary)] bg-[var(--color-primary)] text-white">
-                    
-                    <th className="navbar-text whitespace-nowrap px-2 py-3 text-xs uppercase sm:px-3">Fecha</th>
-                    <th className="navbar-text whitespace-nowrap px-2 py-3 text-xs uppercase sm:px-3">
+                  <tr className="bg-black text-white">
+                    <th className="whitespace-nowrap px-3 py-2.5 text-[0.6875rem] font-bold uppercase tracking-[0.12em]">
+                      Fecha
+                    </th>
+                    <th className="whitespace-nowrap px-3 py-2.5 text-[0.6875rem] font-bold uppercase tracking-[0.12em]">
                       Compañero
                     </th>
-                    <th className="navbar-text whitespace-nowrap px-2 py-3 text-xs uppercase sm:px-3">
+                    <th className="whitespace-nowrap px-3 py-2.5 text-[0.6875rem] font-bold uppercase tracking-[0.12em]">
                       Pareja rival
                     </th>
-                    <th className="navbar-text whitespace-nowrap px-2 py-3 text-xs uppercase sm:px-3 text-center">Resultado</th>
-                    <th className="navbar-text whitespace-nowrap px-2 py-3 text-xs uppercase sm:px-3 text-center">
-                      ELO antes
+                    <th className="whitespace-nowrap px-3 py-2.5 text-center text-[0.6875rem] font-bold uppercase tracking-[0.12em]">
+                      Resultado
                     </th>
-                    <th className="navbar-text whitespace-nowrap px-2 py-3 text-xs uppercase sm:px-3 text-center">
-                      ELO después
+                    <th className="whitespace-nowrap px-3 py-2.5 text-center text-[0.6875rem] font-bold uppercase tracking-[0.12em]">
+                      ELO
                     </th>
-                    <th className="navbar-text whitespace-nowrap px-2 py-3 text-xs uppercase sm:px-3 text-center">Δ</th>
+                    <th className="whitespace-nowrap px-3 py-2.5 text-center text-[0.6875rem] font-bold uppercase tracking-[0.12em]">
+                      Δ
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -325,88 +378,59 @@ export default async function PlayerHistoryPage({ params }: PageProps) {
                     return (
                       <tr
                         key={m.rowId || `m-${m.ratingMatchId}-${index}`}
-                        className={
-                          index % 2 === 0
-                            ? "border-b border-[var(--color-muted)] bg-[var(--color-muted)]/60"
-                            : "border-b border-[var(--color-muted)] bg-[var(--color-surface)]"
-                        }
+                        className="border-t border-black/5 bg-[var(--color-surface)] transition-colors even:bg-[var(--color-muted)]/50 hover:bg-[var(--color-muted)]"
                       >
-                       
-                        <td className="whitespace-nowrap px-2 py-2 text-[var(--color-foreground)] sm:px-3">
+                        <td className="whitespace-nowrap px-3 py-2.5 tabular-nums text-[var(--color-subtle-text)]">
                           {formatDate(m.playedAt)}
                         </td>
-                        <td className="min-w-[11rem] px-2 py-2 sm:px-3">
-                          <div className="flex flex-col gap-1.5">
-                            <div>
-                              <span className="text-[10px] uppercase text-[var(--color-subtle-text)]">Tú</span>
-                              <p className="font-semibold leading-tight text-[var(--color-foreground)]">{name}</p>
-                            </div>
-                            <div>
-                              <span className="text-[10px] uppercase text-[var(--color-subtle-text)]">
-                                Compañero
-                              </span>
-                              <p className="leading-tight">
-                                {m.partner ? (
-                                  <PlayerLink id={m.partner.id} label={m.partner.label} />
-                                ) : (
-                                  <span className="text-[var(--color-subtle-text)]">—</span>
-                                )}
-                              </p>
-                            </div>
-                          </div>
+                        <td className="px-3 py-2.5">
+                          {m.partner ? (
+                            <PlayerLink id={m.partner.id} label={m.partner.label} />
+                          ) : (
+                            <span className="text-[var(--color-subtle-text)]">—</span>
+                          )}
                         </td>
-                        <td className="min-w-[11rem] px-2 py-2 sm:px-3">
-                          <div className="flex flex-col gap-1.5">
-                            <div>
-                              <span className="text-[10px] uppercase text-[var(--color-subtle-text)]">
-                                Rival 1
-                              </span>
-                              <p className="leading-tight">
-                                {m.opponents[0] ? (
-                                  <PlayerLink id={m.opponents[0].id} label={m.opponents[0].label} />
-                                ) : (
-                                  <span className="text-[var(--color-subtle-text)]">—</span>
-                                )}
-                              </p>
+                        <td className="px-3 py-2.5">
+                          {m.opponents.length > 0 ? (
+                            <div className="flex flex-col gap-0.5">
+                              {m.opponents.map((o) => (
+                                <PlayerLink key={o.id} id={o.id} label={o.label} />
+                              ))}
                             </div>
-                            <div>
-                              <span className="text-[10px] uppercase text-[var(--color-subtle-text)]">
-                                Rival 2
-                              </span>
-                              <p className="leading-tight">
-                                {m.opponents[1] ? (
-                                  <PlayerLink id={m.opponents[1].id} label={m.opponents[1].label} />
-                                ) : (
-                                  <span className="text-[var(--color-subtle-text)]">—</span>
-                                )}
-                              </p>
-                            </div>
-                          </div>
+                          ) : (
+                            <span className="text-[var(--color-subtle-text)]">—</span>
+                          )}
                         </td>
-                        <td className="px-2 py-2 sm:px-3 text-center">
+                        <td className="px-3 py-2.5 text-center">
                           {m.result == null ? (
                             <span className="text-[var(--color-subtle-text)]">—</span>
                           ) : (
                             <span
-                              className={
+                              className={`inline-flex h-6 min-w-6 items-center justify-center rounded-md px-1.5 text-xs font-extrabold ${
                                 m.result === "win"
-                                  ? "font-bold text-emerald-700 dark:text-emerald-400"
-                                  : "font-bold text-rose-700 dark:text-rose-400"
-                              }
+                                  ? "bg-emerald-100 text-emerald-800"
+                                  : "bg-rose-100 text-rose-800"
+                              }`}
+                              title={m.result === "win" ? "Victoria" : "Derrota"}
                             >
                               {m.result === "win" ? "V" : "D"}
                             </span>
                           )}
                         </td>
-                        <td className="px-2 py-2 tabular-nums text-[var(--color-subtle-text)] sm:px-3 text-center">
-                          {m.ratingBefore}
-                        </td>
-                        <td className="navbar-text px-2 py-2 tabular-nums text-[var(--color-primary)] sm:px-3 text-center">
-                          {m.ratingAfter}
+                        <td className="whitespace-nowrap px-3 py-2.5 text-center tabular-nums">
+                          <span className="text-[var(--color-subtle-text)]">{m.ratingBefore}</span>
+                          <span className="mx-1 text-[var(--color-subtle-text)]" aria-hidden>
+                            →
+                          </span>
+                          <span className="font-extrabold text-black">{m.ratingAfter}</span>
                         </td>
                         <td
-                          className={`px-2 py-2 tabular-nums sm:px-3 text-center ${
-                            delta >= 0 ? "text-emerald-700 dark:text-emerald-400" : "text-rose-700 dark:text-rose-400"
+                          className={`px-3 py-2.5 text-center font-bold tabular-nums ${
+                            delta > 0
+                              ? "text-emerald-700"
+                              : delta < 0
+                                ? "text-rose-700"
+                                : "text-[var(--color-subtle-text)]"
                           }`}
                         >
                           {delta > 0 ? `+${delta}` : delta}
