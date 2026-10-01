@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { Navbar } from "@/components/Navbar";
 import { computeTeamEloDeltas, ELO_K, expectedScore } from "@/lib/rating/team-elo";
-import { absoluteUrl } from "@/lib/site-config";
+import { DEFAULT_OG_IMAGES, absoluteUrl } from "@/lib/site-config";
 
 const description =
   "Cómo se calcula el ranking ELO en Sportchain Padel: promedio por pareja, factor K, expectativa y ejemplo numérico con dos resultados posibles.";
@@ -16,6 +16,7 @@ export const metadata: Metadata = {
     description,
     url: "/ranking/calculo",
     locale: "es_ES",
+    images: DEFAULT_OG_IMAGES,
   },
   alternates: {
     canonical: absoluteUrl("/ranking/calculo"),

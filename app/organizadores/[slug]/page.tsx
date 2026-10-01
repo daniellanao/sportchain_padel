@@ -10,7 +10,7 @@ import {
   fetchOrganizerBySlugFromSupabase,
   fetchOrganizerRankedPlayersFromSupabase,
 } from "@/lib/organizers/supabase-organizers";
-import { absoluteUrl } from "@/lib/site-config";
+import { DEFAULT_OG_IMAGES, absoluteUrl } from "@/lib/site-config";
 
 export const revalidate = 60;
 
@@ -31,6 +31,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title: organizer.name,
       url: `/organizadores/${organizer.slug}`,
       locale: "es_ES",
+      images: DEFAULT_OG_IMAGES,
     },
     alternates: {
       canonical: absoluteUrl(`/organizadores/${organizer.slug}`),

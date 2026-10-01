@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 
+import { DEFAULT_OG_IMAGES } from "@/lib/site-config";
+
 import { Navbar } from "@/components/Navbar";
 import { VenueCard } from "@/components/venues/VenueCard";
 import { compareVenuesByRating, fetchVenuesListFromSupabase } from "@/lib/venues/supabase-venues";
@@ -15,6 +17,7 @@ export const metadata: Metadata = {
     description,
     url: "/clubes",
     locale: "es_ES",
+    images: DEFAULT_OG_IMAGES,
   },
   alternates: {
     canonical: "/clubes",

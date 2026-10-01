@@ -5,6 +5,7 @@ import { ConditionalFooter } from "@/components/ConditionalFooter";
 import { JsonLd } from "@/components/JsonLd";
 import {
   DEFAULT_OG_IMAGE_PATH,
+  DEFAULT_OG_IMAGES,
   SITE_DESCRIPTION,
   SITE_KEYWORDS,
   SITE_NAME,
@@ -52,14 +53,7 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     title: SITE_NAME,
     description: SITE_DESCRIPTION,
-    images: [
-      {
-        url: DEFAULT_OG_IMAGE_PATH,
-        width: 1200,
-        height: 630,
-        alt: "Sportchain Padel - Clubes, Torneos y Ranking de Padel Internacional.",
-      },
-    ],
+    images: DEFAULT_OG_IMAGES,
   },
   twitter: {
     card: "summary_large_image",

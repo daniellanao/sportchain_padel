@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+
+import { DEFAULT_OG_IMAGES } from "@/lib/site-config";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -17,6 +19,7 @@ export const metadata: Metadata = {
     description,
     url: "/organizadores",
     locale: "es_ES",
+    images: DEFAULT_OG_IMAGES,
   },
   alternates: {
     canonical: "/organizadores",

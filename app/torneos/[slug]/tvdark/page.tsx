@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { RoundMatches, type RoundMatchesRound } from "@/components/tournaments/RoundMatches";
 import { StandingsTable } from "@/components/tournaments/StandingsTable";
 import { formatTournamentFormatLabel } from "@/data/tournaments";
-import { absoluteUrl } from "@/lib/site-config";
+import { DEFAULT_OG_IMAGES, absoluteUrl } from "@/lib/site-config";
 import { fetchTournamentPageData } from "@/lib/tournaments/tournament-page-data";
 import { fetchTournamentBySlugFromSupabase } from "@/lib/tournaments/supabase-list";
 
@@ -31,6 +31,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       description,
       url: `/torneos/${tournament.slug}/tvdark`,
       locale: "es_ES",
+      images: DEFAULT_OG_IMAGES,
     },
     alternates: {
       canonical: absoluteUrl(`/torneos/${tournament.slug}/tvdark`),

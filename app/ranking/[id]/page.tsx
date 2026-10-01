@@ -6,7 +6,7 @@ import { Navbar } from "@/components/Navbar";
 import { EloEvolutionChart, type EloPoint } from "@/components/ranking/EloEvolutionChart";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { fetchPlayerByIdFromSupabase, fetchRankingPositionFromSupabase } from "@/lib/ranking/supabase-players";
-import { absoluteUrl } from "@/lib/site-config";
+import { DEFAULT_OG_IMAGES, absoluteUrl } from "@/lib/site-config";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -30,6 +30,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       description,
       url: `/ranking/${row.id}`,
       locale: "es_ES",
+      images: DEFAULT_OG_IMAGES,
     },
     alternates: {
       canonical: absoluteUrl(`/ranking/${row.id}`),

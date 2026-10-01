@@ -6,10 +6,10 @@
  */
 export const PRODUCTION_SITE_URL = "https://padel.sportchain.io" as const;
 
-export const SITE_NAME = "Padel - Sportchain - Ranking y Torneos";
+export const SITE_NAME = "Padel - Sportchain: Clubes, Torneos y Ranking";
 
 export const SITE_DESCRIPTION =
-  "Comunidad de Padel de Sportchain: Ranking de Jugadores y Torneos"
+  "Comunidad de Padel de Sportchain: Clubes, Torneos y Ranking"
 
 export const SITE_KEYWORDS = [
   "Sportchain",
@@ -24,7 +24,20 @@ export const SITE_KEYWORDS = [
 ] as const;
 
 /** Default OG / social image under `public/` */
-export const DEFAULT_OG_IMAGE_PATH = "/sportchain_padel_ranking_bg.png";
+export const DEFAULT_OG_IMAGE_PATH = "/sportchain_opengraph.png";
+
+/**
+ * Next replaces `openGraph` per segment instead of merging it, so every page that defines
+ * `openGraph` must include `images` or it loses the layout's image.
+ */
+export const DEFAULT_OG_IMAGES = [
+  {
+    url: DEFAULT_OG_IMAGE_PATH,
+    width: 600,
+    height: 400,
+    alt: "Sportchain Padel - Clubes, Torneos y Ranking de Padel",
+  },
+];
 
 export function getSiteUrl(): string {
   const fromEnv = process.env.NEXT_PUBLIC_SITE_URL?.trim();

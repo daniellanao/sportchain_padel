@@ -7,7 +7,7 @@ import { HomeTopClubsSection } from "@/components/HomeTopClubsSection";
 import { Navbar } from "@/components/Navbar";
 import { SportchainAbout } from "@/components/SportchainAbout";
 import { FeaturedTournament } from "@/components/tournaments/FeaturedTournament";
-import { SITE_DESCRIPTION, SITE_NAME } from "@/lib/site-config";
+import { DEFAULT_OG_IMAGES, SITE_DESCRIPTION, SITE_NAME } from "@/lib/site-config";
 
 export const revalidate = 60;
 
@@ -19,6 +19,7 @@ export const metadata: Metadata = {
     description: SITE_DESCRIPTION,
     url: "/",
     locale: "es_ES",
+    images: DEFAULT_OG_IMAGES,
   },
   alternates: {
     canonical: "/",
