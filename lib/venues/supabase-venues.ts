@@ -19,6 +19,14 @@ export type VenuesListResult =
   | { ok: true; venues: VenueDbRow[] }
   | { ok: false; error: string; venues: VenueDbRow[] };
 
+/** Sort: Google stars descending (no rating last), then name A–Z. */
+export function compareVenuesByRating(a: VenueDbRow, b: VenueDbRow): number {
+  const sa = a.stars == null || Number.isNaN(a.stars) ? -1 : a.stars;
+  const sb = b.stars == null || Number.isNaN(b.stars) ? -1 : b.stars;
+  if (sa !== sb) return sb - sa;
+  return a.name.localeCompare(b.name, "es", { sensitivity: "base" });
+}
+
 export async function fetchVenuesListFromSupabase(): Promise<VenuesListResult> {
   const supabase = createSupabaseServerClient();
   if (!supabase) {
