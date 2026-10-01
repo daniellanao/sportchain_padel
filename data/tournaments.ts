@@ -12,6 +12,8 @@ export type Tournament = {
   slug: string;
   /** Display title */
   name: string;
+  /** Short description (Supabase `description`) */
+  description?: string;
   /** ISO date YYYY-MM-DD (local calendar day for the event) */
   dateISO: string;
   /** 24h time HH:mm */

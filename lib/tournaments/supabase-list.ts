@@ -69,6 +69,7 @@ function rowToTournament(
     id: String(row.id),
     slug,
     name: row.name,
+    description: row.description?.trim() || undefined,
     ...dates,
     playerCount: maxTeams > 0 ? maxTeams * 2 : 0,
     registeredPlayerCount,
