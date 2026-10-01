@@ -7,17 +7,20 @@ import { useMemo, useState } from "react";
 
 import type { PlayerDbRow } from "@/lib/ranking/supabase-players";
 
+type RankingTablePlayer = Pick<PlayerDbRow, "id" | "name" | "lastname" | "rating" | "matches_played" | "stars">;
+
 export type RankedPlayerRow = {
-  player: PlayerDbRow;
+  player: RankingTablePlayer;
   index: number;
   position: number;
 };
 
 type RankingPlayersTableProps = {
   rankedPlayers: RankedPlayerRow[];
+  emptyMessage?: string;
 };
 
-function playerMatchesQuery(player: PlayerDbRow, query: string): boolean {
+function playerMatchesQuery(player: RankingTablePlayer, query: string): boolean {
   const q = query.trim().toLowerCase();
   if (!q) return true;
   const fullName = `${player.name} ${player.lastname}`.toLowerCase();
@@ -28,7 +31,10 @@ function playerMatchesQuery(player: PlayerDbRow, query: string): boolean {
   );
 }
 
-export function RankingPlayersTable({ rankedPlayers }: RankingPlayersTableProps) {
+export function RankingPlayersTable({
+  rankedPlayers,
+  emptyMessage = "No hay jugadores en el ranking todavía.",
+}: RankingPlayersTableProps) {
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(
@@ -105,7 +111,7 @@ export function RankingPlayersTable({ rankedPlayers }: RankingPlayersTableProps)
                   colSpan={5}
                   className="bg-[var(--color-surface)] px-3 py-6 text-center text-sm text-[var(--color-subtle-text)]"
                 >
-                  No hay jugadores en el ranking todavía.
+                  {emptyMessage}
                 </td>
               </tr>
             ) : filtered.length === 0 ? (
