@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist_Mono, Open_Sans } from "next/font/google";
 
 import { ConditionalFooter } from "@/components/ConditionalFooter";
 import { JsonLd } from "@/components/JsonLd";
@@ -13,9 +13,10 @@ import {
 
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const openSans = Open_Sans({
+  variable: "--font-open-sans",
   subsets: ["latin"],
+  axes: ["wdth"],
 });
 
 const geistMono = Geist_Mono({
@@ -56,7 +57,7 @@ export const metadata: Metadata = {
         url: DEFAULT_OG_IMAGE_PATH,
         width: 1200,
         height: 630,
-        alt: "Sportchain Padel — ranking y torneos de pádel (eventos Sportchain)",
+        alt: "Sportchain Padel - Clubes, Torneos y Ranking de Padel Internacional.",
       },
     ],
   },
@@ -103,7 +104,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+    <html lang="es" className={`${openSans.variable} ${geistMono.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
         <JsonLd data={websiteJsonLd} />
         <div className="flex min-h-full flex-1 flex-col">{children}</div>

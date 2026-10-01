@@ -1,8 +1,15 @@
 "use client";
 
+import { Montserrat } from "next/font/google";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useState } from "react";
+
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  weight: "700",
+});
 
 const NAV_ITEMS = [
   { href: "/", label: "Inicio" },
@@ -37,34 +44,35 @@ export function Navbar() {
   }, [open]);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[#12305D]/10 bg-white/95 backdrop-blur-sm">
+    <header className={`${montserrat.className} sticky top-0 z-50 bg-black font-bold text-white`}>
       <nav
-        className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-4 px-4 sm:h-16 sm:px-6"
+        className="relative mx-auto flex h-14 w-full max-w-6xl items-center justify-center gap-12 px-4 sm:px-6"
         aria-label="Principal"
       >
-        <Link href="/" className="logo shrink-0 text-[0.8125rem] leading-none text-[#12305D] sm:text-sm">
-          SportChain <span className="font-semibold tracking-[0.06em] text-[#12305D]/65">Padel</span>
+        <Link href="/" className="shrink-0" aria-label="SportChain Padel — Inicio">
+          <Image
+            src="/sportchain_isotipo.png"
+            alt="SportChain Padel"
+            width={28}
+            height={28}
+            priority
+            className="h-7 w-7"
+          />
         </Link>
 
-        <ul className="hidden items-center gap-1 md:flex">
+        <ul className="hidden items-center gap-10 md:flex">
           {NAV_ITEMS.map((item) => {
             const active = isActivePath(pathname, item.href);
             return (
               <li key={item.href}>
                 <Link
                   href={item.href}
-                  className={`relative px-3 py-2 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] transition-colors ${
-                    active ? "text-[#12305D]" : "text-[#12305D]/55 hover:text-[#12305D]"
+                  className={`py-2 text-sm uppercase tracking-[0.06em] transition-colors ${
+                    active ? "text-white" : "text-white/70 hover:text-white"
                   }`}
                   aria-current={active ? "page" : undefined}
                 >
                   {item.label}
-                  {active ? (
-                    <span
-                      className="absolute inset-x-3 -bottom-[calc(0.5rem+1px)] h-0.5 bg-[#12305D]"
-                      aria-hidden
-                    />
-                  ) : null}
                 </Link>
               </li>
             );
@@ -73,7 +81,7 @@ export function Navbar() {
 
         <button
           type="button"
-          className="flex h-10 w-10 shrink-0 items-center justify-center text-[#12305D] md:hidden"
+          className="absolute right-4 flex h-10 w-10 items-center justify-center text-white md:hidden"
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
           aria-controls={menuId}
@@ -96,12 +104,12 @@ export function Navbar() {
 
       <div
         id={menuId}
-        className={`overflow-hidden border-t border-[#12305D]/10 bg-white transition-[max-height] duration-200 ease-out md:hidden ${
+        className={`overflow-hidden border-t border-white/10 bg-black transition-[max-height] duration-200 ease-out md:hidden ${
           open ? "max-h-72" : "max-h-0 border-t-0"
         }`}
         aria-hidden={!open}
       >
-        <ul className="mx-auto flex w-full max-w-6xl flex-col px-4 py-2 sm:px-6">
+        <ul className="mx-auto flex w-full max-w-6xl flex-col items-center py-2">
           {NAV_ITEMS.map((item) => {
             const active = isActivePath(pathname, item.href);
             return (
@@ -109,10 +117,8 @@ export function Navbar() {
                 <Link
                   href={item.href}
                   onClick={() => setOpen(false)}
-                  className={`block border-l-2 px-3 py-3 text-xs font-semibold uppercase tracking-[0.14em] transition-colors ${
-                    active
-                      ? "border-[#12305D] text-[#12305D]"
-                      : "border-transparent text-[#12305D]/60 hover:text-[#12305D]"
+                  className={`block px-3 py-3 text-sm uppercase tracking-[0.06em] transition-colors ${
+                    active ? "text-white" : "text-white/70 hover:text-white"
                   }`}
                   aria-current={active ? "page" : undefined}
                 >

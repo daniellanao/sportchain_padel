@@ -63,19 +63,19 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-montserrat), Arial, Helvetica, sans-serif;
+  font-family: var(--font-open-sans), Arial, Helvetica, sans-serif;
 }
 
 /* Custom logo and navbar text classes */
 .logo {
-  font-family: var(--font-montserrat), "Arial Black", "Helvetica Black", sans-serif;
-  font-weight: 900;
+  font-family: var(--font-open-sans), Arial, Helvetica, sans-serif;
+  font-weight: 800;
   letter-spacing: 0.01em;
   text-transform: uppercase;
 }
 
 .navbar-text {
-  font-family: "Arial Black", "Helvetica Black", sans-serif;
+  font-family: var(--font-open-sans), Arial, Helvetica, sans-serif;
   font-weight: 700;
   letter-spacing: 0.05em;
 }
@@ -171,6 +171,15 @@ h1, h2, h3, h4, h5, h6 {
   background-color: var(--color-primary);
 }
 
+@keyframes hero-breathe {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.1);
+  }
+}
+
 @keyframes hero-fade {
   from {
     opacity: 0;
@@ -179,14 +188,5 @@ h1, h2, h3, h4, h5, h6 {
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@keyframes hero-zoom {
-  from {
-    transform: scale(1.05);
-  }
-  to {
-    transform: scale(1);
   }
 }
